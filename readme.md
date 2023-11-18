@@ -2,6 +2,7 @@
 
 ``` ini
 ; platformio.ini
+
 [env:adafruit_feather_esp32s3]
 platform = espressif32
 board = adafruit_feather_esp32s3
@@ -14,7 +15,12 @@ monitor_speed = 115200
 lib_deps = https://bitbucket.org/shetzel84/otam-client-esp32.git
 ```
 
+<br />
+<br />
+
 ``` cpp
+// main.cpp
+
 #include <HTTPClient.h>
 #include <Arduino.h>
 #include <WiFi.h>
