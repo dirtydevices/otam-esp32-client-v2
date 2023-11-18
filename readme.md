@@ -16,7 +16,6 @@ lib_deps = https://bitbucket.org/shetzel84/otam-client-esp32.git
 ```
 
 <br />
-<br />
 
 ``` cpp
 // main.cpp
