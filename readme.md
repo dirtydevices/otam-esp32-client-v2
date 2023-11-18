@@ -15,7 +15,6 @@ monitor_speed = 115200
 lib_deps = https://bitbucket.org/shetzel84/otam-client-esp32.git
 ```
 
-<br />
 
 ``` cpp
 // main.cpp
