@@ -8,14 +8,13 @@ struct OTAMConfig
     String firmwareId;
     String deviceId = "";
     String deviceName = "";
-    String currentFirmwareVersion = "";
 };
 
 class OTAMClient
 {
 private:
     OTAMConfig otamConfig;
-    String firmware_url = "";
+    String deviceUrl = "";
 
 public:
     OTAMClient(OTAMConfig config)
@@ -34,14 +33,11 @@ public:
         // Set the firmware ID
         otamConfig.firmwareId = config.firmwareId;
 
-        // Set the firmware URL
-        firmware_url = otamConfig.url + "/firmware/" + otamConfig.firmwareId;
+        // Set the device URL
+        deviceUrl = otamConfig.url + "/device/" + otamConfig.deviceId;
 
         // Set the device name, use a default value if not provided
         otamConfig.deviceName = config.deviceName.isEmpty() ? "DefaultDeviceName" : config.deviceName;
-
-        // Set the current firmware version
-        otamConfig.currentFirmwareVersion = config.currentFirmwareVersion;
     }
 
     boolean hasPendingUpdate()
@@ -50,11 +46,11 @@ public:
 
         HTTPClient http;
 
-        String check_url = firmware_url + "/check?deviceId=" + otamConfig.deviceId + "&deviceName=" + otamConfig.deviceName + "&currentFirmwareVersion=" + otamConfig.currentFirmwareVersion;
+        String deviceStatusUrl = deviceUrl + "/status?deviceId=" + otamConfig.deviceId;
 
-        Serial.println("Firmware check url: " + check_url);
+        Serial.println("deviceStatus url: " + deviceStatusUrl);
 
-        http.begin(check_url);
+        http.begin(deviceStatusUrl);
 
         int httpCode = http.GET();
 
@@ -65,7 +61,7 @@ public:
             Serial.println("Payload: " + payload);
 
             // Get the update available flag
-            if (payload == "true")
+            if (payload == "UPDATE_PENDING")
             {
                 Serial.println("Firmware update available");
                 return true;
@@ -92,11 +88,11 @@ public:
 
         HTTPClient http;
 
-        String download_url = firmware_url + "/download";
+        String downloadUrl = deviceUrl + "/download";
 
-        Serial.println("Firmware download url: " + download_url);
+        Serial.println("Firmware download url: " + downloadUrl);
 
-        http.begin(download_url);
+        http.begin(downloadUrl);
 
         int httpCode = http.GET();
 
@@ -132,7 +128,8 @@ public:
                     if (Update.isFinished())
                     {
                         Serial.println("Update successfully completed. Rebooting.");
-                        ESP.restart();
+                        Serial.println("NOTE: restart has been commented out");
+                        // ESP.restart();
                     }
                     else
                     {
