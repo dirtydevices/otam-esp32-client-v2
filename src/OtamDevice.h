@@ -1,60 +1,44 @@
-#include <Preferences.h>
+#include <OtamConfig.h>
+#include <OtamUtils.h>
+#include <OtamStore.h>
 
-String generatePseudoGUID()
+class OtamDevice
 {
-    String guid = "otam_";
-    static const char alphanum[] = "0123456789ABCDEF";
+private:
+    static String deviceName;
+    static String deviceId;
+    static String deviceUrl;
+    static void registerDevice(OtamConfig config)
+    {
+        Serial.println("Registering device");
 
-    for (int i = 0; i < 8; i++)
-    {
-        guid += alphanum[random(16)];
-    }
-    guid += "-";
-    for (int i = 0; i < 4; i++)
-    {
-        guid += alphanum[random(16)];
-    }
-    guid += "-";
-    for (int i = 0; i < 4; i++)
-    {
-        guid += alphanum[random(16)];
+        HTTPClient http;
     }
 
-    return guid;
-}
-
-String readOrGenerateDeviceID(const String &newDeviceID = "")
-{
-    Preferences preferences;
-    if (!preferences.begin("my-app", false))
+public:
+    static String deviceStatusUrl;
+    static String deviceDownloadUrl;
+    static void initialize(OtamConfig config)
     {
-        Serial.println("Failed to initialize NVS");
-        return "";
-    }
+        try
+        {
+            // If no id passed in, try to read from store
+            String deviceId = !config.deviceId.isEmpty() ? config.deviceId : OtamStore::readDeviceIdFromStore();
 
-    String deviceId;
+            // If still no id, generate one
+            deviceId = !deviceId.isEmpty() ? deviceId : OtamUtils::generatePseudoGUID();
 
-    if (!newDeviceID.isEmpty())
-    {
-        deviceId = newDeviceID; // Device Id provided, use it
-    }
-    else if (preferences.isKey("device_id"))
-    {
-        deviceId = preferences.getString("device_id"); // Try to read the device ID from NVS
-    }
-    else
-    {
-        deviceId = generatePseudoGUID(); // Simple random generator for example purposes
-    }
+            // Update the OTAM Config
+            config.deviceId = deviceId;
 
-    // Write the new or provided device ID to NVS
-    if (!preferences.putString("device_id", deviceId))
-    {
-        Serial.println("Failed to write device ID to NVS");
-        preferences.end();
-        return "";
+            // Write the device ID to the store
+            OtamStore::writeDeviceIdToStore(deviceId);
+        }
+        catch (const std::exception &e)
+        {
+            // Log the error
+            Serial.println("Failed to initialize device with OTAM config");
+            Serial.println(e.what());
+        }
     }
-
-    preferences.end();
-    return deviceId;
-}
+};

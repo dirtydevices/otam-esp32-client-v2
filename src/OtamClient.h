@@ -1,43 +1,34 @@
 #include <HTTPClient.h>
 #include <Update.h>
+#include <OtamConfig.h>
 #include <OtamDevice.h>
 
-struct OTAMConfig
-{
-    String url;
-    String firmwareId;
-    String deviceId = "";
-    String deviceName = "";
-};
-
-class OTAMClient
+class OtamClient
 {
 private:
-    OTAMConfig otamConfig;
+    String baseUrl = "";
+    OtamConfig otamConfig;
     String deviceUrl = "";
 
 public:
-    OTAMClient(OTAMConfig config)
+    OtamClient(OtamConfig config)
     {
         otamConfig = config;
 
         // Set the URL
-        otamConfig.url = config.url;
+        baseUrl = config.url;
 
         // Set the device ID, generate one if not provided
-        otamConfig.deviceId = readOrGenerateDeviceID(config.deviceId);
+        otamConfig.deviceId = OtamDevice::readOrGenerateDeviceID(config.deviceId);
 
         // Output the device ID
         Serial.println("Device ID: " + otamConfig.deviceId);
 
-        // Set the firmware ID
-        otamConfig.firmwareId = config.firmwareId;
-
         // Set the device URL
-        deviceUrl = otamConfig.url + "/device/" + otamConfig.deviceId;
+        deviceUrl = baseUrl + "/device/" + otamConfig.deviceId;
 
         // Set the device name, use a default value if not provided
-        otamConfig.deviceName = config.deviceName.isEmpty() ? "DefaultDeviceName" : config.deviceName;
+        otamConfig.initialzeDeviceName = config.initialzeDeviceName.isEmpty() ? "DefaultDeviceName" : config.initialzeDeviceName;
     }
 
     boolean hasPendingUpdate()

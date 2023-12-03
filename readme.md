@@ -1,6 +1,6 @@
 # Usage
 
-``` ini
+```ini
 ; platformio.ini
 
 [env:adafruit_feather_esp32s3]
@@ -15,8 +15,7 @@ monitor_speed = 115200
 lib_deps = https://bitbucket.org/shetzel84/otam-client-esp32.git
 ```
 
-
-``` cpp
+```cpp
 // main.cpp
 
 #include <HTTPClient.h>
