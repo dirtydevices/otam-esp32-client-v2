@@ -1,6 +1,8 @@
+#include "internal/OtamHttp.h"
+#include "internal/OtamConfig.h"
+#include "internal/OtamLogDb.h"
 #include "internal/OtamUtils.h"
 #include "internal/OtamStore.h"
-#include "internal/OtamHttp.h"
 #include "internal/OtamUpdater.h"
 
 class OtamDevice
@@ -20,7 +22,7 @@ private:
     void registerDevice()
     {
         // Create the payload
-        String payload = "{\"deviceId\":\"" + deviceId + "\",\"deviceName\":\"" + deviceName + "\"}";
+        String payload = "{\"deviceName\":\"" + deviceName + "\"}";
 
         // Register the device
         String response = OtamHttp::post(deviceRegisterUrl, payload);
@@ -33,9 +35,11 @@ public:
     String deviceId;
     String deviceName;
     String deviceUrl;
+    String deviceLogUrl;
     String deviceStatusUrl;
     String deviceRegisterUrl;
     String deviceDownloadUrl;
+    OtamLogDb *logDb;
     OtamDevice(OtamConfig config)
     {
         try
@@ -49,6 +53,9 @@ public:
             // Set the device URL
             deviceUrl = config.url + "/devices/" + config.deviceId;
 
+            // Set the device log URL
+            deviceLogUrl = this->deviceUrl + "/log";
+
             // Set the device status URL
             deviceStatusUrl = this->deviceUrl + "/status";
 
@@ -57,6 +64,9 @@ public:
 
             // Set the device download URL
             deviceDownloadUrl = this->deviceUrl + "/download";
+
+            // Create the db logger
+            logDb = new OtamLogDb(deviceLogUrl);
 
             // Register device with OTAM server
             registerDevice();
