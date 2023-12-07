@@ -8,7 +8,7 @@ public:
         Preferences preferences;
         if (!preferences.begin("otam-store", false))
         {
-            throw "Failed to initialize NVS";
+            throw std::runtime_error("Failed to initialize NVS");
         }
 
         String deviceId;
@@ -27,12 +27,12 @@ public:
         Preferences preferences;
         if (!preferences.begin("otam-store", false))
         {
-            throw "Failed to initialize NVS";
+            throw std::runtime_error("Failed to initialize NVS");
         }
 
         if (!preferences.putString("device_id", deviceId))
         {
-            Serial.println("Failed to write device ID to NVS");
+            throw std::runtime_error("Failed to write device ID to NVS");
             preferences.end();
             return;
         }

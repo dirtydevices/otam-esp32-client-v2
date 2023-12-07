@@ -1,4 +1,5 @@
 #include "internal/OtamConfig.h"
+#include "internal/OtamLogger.h"
 #include "internal/OtamHttp.h"
 #include "internal/OtamDevice.h"
 
@@ -8,8 +9,17 @@ private:
     OtamDevice *otamDevice;
 
 public:
-    OtamClient(OtamConfig config)
+    void setLogLevel(OtamLogLevel logLevel)
     {
+        Serial.println("Setting log level to: " + String(logLevel));
+        OtamLogger::setLogLevel(logLevel);
+    }
+
+    void initialize(OtamConfig config)
+    {
+        OtamLogger::debug("Initializing OTAM client");
+
+        // Create the device
         otamDevice = new OtamDevice(config);
     }
 
@@ -20,6 +30,15 @@ public:
 
         // Send the log entry
         String response = OtamHttp::post(otamDevice->deviceLogUrl, payload);
+
+        if (response == "OK")
+        {
+            Serial.println("Device message logged successfully: " + message);
+        }
+        else
+        {
+            throw std::runtime_error("Device message logging failed");
+        }
     }
 
     boolean hasPendingUpdate()
@@ -58,7 +77,7 @@ public:
         }
         else
         {
-            throw "Firmware download failed, error: " + httpCode;
+            throw std::runtime_error("Firmware download failed, error: " + httpCode);
         }
     }
 };

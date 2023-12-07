@@ -6,19 +6,43 @@
 class OtamDevice
 {
 private:
+    void writeIdToStore(String id)
+    {
+        OtamStore::writeDeviceIdToStore(id);
+        Serial.println("Device id written to store: " + id);
+    }
+
     void setDeviceId(OtamConfig config)
     {
-        // If no id passed in, try to read from store
-        deviceId = !config.deviceId.isEmpty() ? config.deviceId : OtamStore::readDeviceIdFromStore();
+        deviceId = OtamStore::readDeviceIdFromStore();
 
-        // If still no id, generate one
-        deviceId = !deviceId.isEmpty() ? deviceId : OtamUtils::generatePseudoGUID();
-
-        // Write the device ID to the store
-        OtamStore::writeDeviceIdToStore(deviceId);
+        if (!config.deviceId.isEmpty())
+        {
+            if (deviceId != config.deviceId)
+            {
+                OtamLogger::info("Device id passed by config: " + config.deviceId + "Writing to store.");
+                writeIdToStore(config.deviceId);
+            }
+            else
+            {
+                OtamLogger::debug("Device id already in store: " + deviceId);
+            }
+        }
+        else if (deviceId.isEmpty())
+        {
+            deviceId = OtamUtils::generatePseudoGUID();
+            OtamLogger::info("Generated new device id: " + deviceId);
+            writeIdToStore(deviceId);
+        }
+        else
+        {
+            OtamLogger::debug("Device id already in store: " + deviceId);
+        }
     }
     void registerDevice()
     {
+        Serial.println("Registering device with OTAM server");
+
         // Create the payload
         String payload = "{\"deviceName\":\"" + deviceName + "\"}";
 
@@ -26,7 +50,7 @@ private:
         String response = OtamHttp::post(deviceRegisterUrl, payload);
 
         // Log the response
-        Serial.println("Device registration response: " + response);
+        OtamLogger::info("Device registration response: " + response);
     }
 
 public:
@@ -40,40 +64,31 @@ public:
     OtamLogDb *logDb;
     OtamDevice(OtamConfig config)
     {
-        try
-        {
-            // Creates a device id if one is not passed in and stores it in NVS
-            setDeviceId(config);
+        // Creates a device id if one is not passed in and stores it in NVS
+        setDeviceId(config);
 
-            // Set the device name
-            deviceName = config.deviceName;
+        // Set the device name
+        deviceName = config.deviceName;
 
-            // Set the device URL
-            deviceUrl = config.url + "/devices/" + config.deviceId;
+        // Set the device URL
+        deviceUrl = config.url + "/devices/" + deviceId;
 
-            // Set the device log URL
-            deviceLogUrl = this->deviceUrl + "/log";
+        // Set the device log URL
+        deviceLogUrl = this->deviceUrl + "/log";
 
-            // Set the device status URL
-            deviceStatusUrl = this->deviceUrl + "/status";
+        // Set the device status URL
+        deviceStatusUrl = this->deviceUrl + "/status";
 
-            // Set the device register URL
-            deviceRegisterUrl = this->deviceUrl + "/register";
+        // Set the device register URL
+        deviceRegisterUrl = this->deviceUrl + "/register";
 
-            // Set the device download URL
-            deviceDownloadUrl = this->deviceUrl + "/download";
+        // Set the device download URL
+        deviceDownloadUrl = this->deviceUrl + "/download";
 
-            // Create the db logger
-            logDb = new OtamLogDb(deviceLogUrl);
+        // Create the db logger
+        logDb = new OtamLogDb(deviceLogUrl);
 
-            // Register device with OTAM server
-            registerDevice();
-        }
-        catch (const std::exception &e)
-        {
-            // Log the error
-            Serial.println(e.what());
-            throw "Failed to initialize device with OTAM config";
-        }
+        // Register device with OTAM server
+        registerDevice();
     }
 };
