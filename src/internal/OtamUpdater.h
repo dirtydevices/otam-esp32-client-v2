@@ -48,4 +48,4 @@ public:
             Serial.println("Not enough space to begin OTA");
         }
     }
-}
+};

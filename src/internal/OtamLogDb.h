@@ -1,5 +1,3 @@
-#include "internal/OtamHttp.h"
-
 class OtamLogDb
 {
 private:

@@ -1,5 +1,3 @@
-#include "internal/OtamHttp.h"
-#include "internal/OtamConfig.h"
 #include "internal/OtamLogDb.h"
 #include "internal/OtamUtils.h"
 #include "internal/OtamStore.h"

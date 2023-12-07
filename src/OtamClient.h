@@ -13,6 +13,15 @@ public:
         otamDevice = new OtamDevice(config);
     }
 
+    void logDeviceMessage(String message)
+    {
+        // Create the payload
+        String payload = "{\"message\":\"" + message + "\"}";
+
+        // Send the log entry
+        String response = OtamHttp::post(otamDevice->deviceLogUrl, payload);
+    }
+
     boolean hasPendingUpdate()
     {
         String response = OtamHttp::get(otamDevice->deviceStatusUrl);
