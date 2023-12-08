@@ -16,11 +16,17 @@ private:
     {
         deviceId = OtamStore::readDeviceIdFromStore();
 
+        if (deviceId)
+        {
+            OtamLogger::verbose("Device id read from store: " + deviceId);
+        }
+
         if (!config.deviceId.isEmpty())
         {
             if (deviceId != config.deviceId)
             {
-                OtamLogger::info("Device id passed by config: " + config.deviceId + "Writing to store.");
+                deviceId = config.deviceId;
+                OtamLogger::info("Device id passed by config: " + config.deviceId + ". Writing to store.");
                 writeIdToStore(config.deviceId);
             }
             else
@@ -28,7 +34,7 @@ private:
                 OtamLogger::debug("Device id already in store: " + deviceId);
             }
         }
-        else if (deviceId.isEmpty())
+        else if (deviceId.isEmpty() || config.regenerateDeviceId == true)
         {
             deviceId = OtamUtils::generatePseudoGUID();
             OtamLogger::info("Generated new device id: " + deviceId);
@@ -41,16 +47,30 @@ private:
     }
     void registerDevice()
     {
-        Serial.println("Registering device with OTAM server");
+        OtamLogger::info("Registering device with OTAM server");
 
         // Create the payload
         String payload = "{\"deviceName\":\"" + deviceName + "\"}";
 
         // Register the device
-        String response = OtamHttp::post(deviceRegisterUrl, payload);
+        OtamHttpResponse response = OtamHttp::post(deviceRegisterUrl, payload);
 
-        // Log the response
-        OtamLogger::info("Device registration response: " + response);
+        // Check the response code
+        if (response.httpCode == 204)
+        {
+            OtamLogger::debug("Devie already registered and nothing to update.");
+        }
+        else if (response.httpCode >= 200 && response.httpCode < 300)
+        {
+            // Log the response
+            OtamLogger::info(response.payload);
+        }
+        else
+        {
+            OtamLogger::error("Device registration failed with status code " + String(response.httpCode));
+            OtamLogger::error(response.payload);
+            throw std::runtime_error("Device registration failed.");
+        }
     }
 
 public:

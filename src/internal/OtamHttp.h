@@ -1,43 +1,54 @@
 #include <HTTPClient.h>
 
+struct OtamHttpResponse
+{
+    int httpCode;
+    String payload;
+};
+
 class OtamHttp
 {
 public:
-    static String get(String url)
+    static OtamHttpResponse get(String url)
     {
         HTTPClient http;
 
         http.begin(url);
 
-        OtamLogger::debug("HTTP GET: " + url);
+        OtamLogger::verbose("HTTP GET: " + url);
 
         int httpCode = http.GET();
 
-        OtamLogger::debug("HTTP GET response code: " + String(httpCode));
+        OtamLogger::verbose("HTTP GET response code: " + String(httpCode));
 
         if (httpCode == HTTP_CODE_OK)
         {
-            OtamLogger::debug("HTTP GET successful");
+            OtamLogger::verbose("HTTP GET successful");
 
             String payload = http.getString();
 
-            OtamLogger::debug("HTTP GET response payload: " + payload);
+            if (!payload.isEmpty())
+            {
+                OtamLogger::verbose("HTTP GET response payload: " + payload);
+            }
 
             http.end();
-            return payload;
+
+            return {httpCode, payload};
         }
         else
         {
             http.end();
+
             throw std::runtime_error("HTTP GET failed, error: " + std::to_string(httpCode));
         }
     }
 
-    static String post(String url, String payload)
+    static OtamHttpResponse post(String url, String payload)
     {
         HTTPClient http;
 
-        OtamLogger::debug("HTTP POST: " + url);
+        OtamLogger::verbose("HTTP POST: " + url);
 
         http.begin(url);
 
@@ -45,20 +56,25 @@ public:
 
         int httpCode = http.POST(payload);
 
-        OtamLogger::debug("HTTP POST response code: " + String(httpCode));
+        OtamLogger::verbose("HTTP POST response code: " + String(httpCode));
 
         if (httpCode >= 200 && httpCode < 300)
         {
             String payload = http.getString();
 
-            OtamLogger::debug("HTTP POST response payload: " + payload);
+            if (!payload.isEmpty())
+            {
+                OtamLogger::verbose("HTTP POST response payload: " + payload);
+            }
 
             http.end();
-            return payload;
+
+            return {httpCode, payload};
         }
         else
         {
             http.end();
+
             throw std::runtime_error("HTTP POST failed, error: " + std::to_string(httpCode));
         }
     }
