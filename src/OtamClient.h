@@ -38,7 +38,9 @@ public:
     OtamClient()
     {
         // If firmware update status success, publish to success callback
-        if (OtamStore::readFirmwareUpdateStatusFromStore() == "UPDATE_SUCCESS")
+        String firmwareUpdateStatus = OtamStore::readFirmwareUpdateStatusFromStore();
+        OtamLogger::verbose("OtamClient Contrcutor: Store -> Firmware update status: " + firmwareUpdateStatus);
+        if (firmwareUpdateStatus == "UPDATE_SUCCESS")
         {
             OtamLogger::debug("Firmware update status is UPDATE_SUCCESS, calling OTA success callback");
             int firmwareFileId = OtamStore::readFirmwareUpdateFileIdFromStore();
@@ -185,7 +187,6 @@ public:
                 // Store the updated firmware version
                 OtamStore::writeFirmwareUpdateVersionToStore(firmwareUpdateVersion);
                 OtamLogger::debug("Firmware update version stored: " + firmwareUpdateVersion);
-
 
                 // Store firmware update status
                 OtamStore::writeFirmwareUpdateStatusToStore("UPDATE_SUCCESS");
