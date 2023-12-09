@@ -38,8 +38,10 @@ public:
         }
         else
         {
+            String resPayload = http.getString();
             http.end();
-
+            OtamLogger::error("HTTP POST failed, error: " + String(httpCode));
+            OtamLogger::error("HTTP POST payload: " + resPayload);
             throw std::runtime_error("HTTP GET failed, error: " + std::to_string(httpCode));
         }
     }
@@ -60,21 +62,23 @@ public:
 
         if (httpCode >= 200 && httpCode < 300)
         {
-            String payload = http.getString();
+            String resPayload = http.getString();
 
-            if (!payload.isEmpty())
+            if (!resPayload.isEmpty())
             {
-                OtamLogger::verbose("HTTP POST response payload: " + payload);
+                OtamLogger::verbose("HTTP POST response payload: " + resPayload);
             }
 
             http.end();
 
-            return {httpCode, payload};
+            return {httpCode, payload : resPayload};
         }
         else
         {
+            String resPayload = http.getString();
             http.end();
-
+            OtamLogger::error("HTTP POST failed, error: " + String(httpCode));
+            OtamLogger::error("HTTP POST payload: " + resPayload);
             throw std::runtime_error("HTTP POST failed, error: " + std::to_string(httpCode));
         }
     }

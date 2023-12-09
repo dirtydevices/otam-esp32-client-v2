@@ -1,10 +1,28 @@
+#include <functional>
 #include <HTTPClient.h>
 #include <Update.h>
 
 class OtamUpdater
 {
 public:
-    static void runESP32Update(HTTPClient &http)
+    // Define the type for the callback functions
+    using CallbackType = std::function<void()>;
+
+    // Variables to hold the callback functions
+    CallbackType otaSuccessCallback;
+    CallbackType otaErrorCallback;
+
+    void onOtaSuccess(CallbackType successCallback)
+    {
+        otaSuccessCallback = successCallback;
+    }
+
+    void onOtaError(CallbackType errorCallback)
+    {
+        otaErrorCallback = errorCallback;
+    }
+
+    void runESP32Update(HTTPClient &http)
     {
         int contentLength = http.getSize();
 
@@ -31,21 +49,36 @@ public:
                 if (Update.isFinished())
                 {
                     OtamLogger::info("Update successfully completed. Rebooting.");
-                    ESP.restart();
+                    if (otaSuccessCallback) // Check if the callback has been set
+                    {
+                        otaSuccessCallback(); // Call the callback
+                    }
                 }
                 else
                 {
                     OtamLogger::error("Update not finished? Something went wrong!");
+                    if (otaErrorCallback) // Check if the callback has been set
+                    {
+                        otaErrorCallback(); // Call the callback
+                    }
                 }
             }
             else
             {
                 OtamLogger::error("Error Occurred. Error #: " + String(Update.getError()));
+                if (otaErrorCallback) // Check if the callback has been set
+                {
+                    otaErrorCallback(); // Call the callback
+                }
             }
         }
         else
         {
             OtamLogger::error("Not enough space to begin OTA");
+            if (otaErrorCallback) // Check if the callback has been set
+            {
+                otaErrorCallback(); // Call the callback
+            }
         }
     }
 };

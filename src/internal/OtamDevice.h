@@ -58,7 +58,7 @@ private:
         // Check the response code
         if (response.httpCode == 204)
         {
-            OtamLogger::debug("Devie already registered and nothing to update.");
+            OtamLogger::debug("Device already registered and nothing to update.");
         }
         else if (response.httpCode >= 200 && response.httpCode < 300)
         {
