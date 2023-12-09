@@ -9,7 +9,7 @@ private:
     void writeIdToStore(String id)
     {
         OtamStore::writeDeviceIdToStore(id);
-        Serial.println("Device id written to store: " + id);
+        OtamLogger::debug("Device id written to store: " + id);
     }
 
     void setDeviceId(OtamConfig config)
@@ -69,7 +69,7 @@ private:
         {
             OtamLogger::error("Device registration failed with status code " + String(response.httpCode));
             OtamLogger::error(response.payload);
-            throw std::runtime_error("Device registration failed.");
+            throw std::runtime_error("Registration failed.");
         }
     }
 

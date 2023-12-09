@@ -1,4 +1,4 @@
-#include <HTTPClient.h>
+#include <HttpClient.h>
 
 struct OtamHttpResponse
 {
@@ -48,9 +48,9 @@ public:
     {
         HTTPClient http;
 
-        OtamLogger::verbose("HTTP POST: " + url);
-
         http.begin(url);
+
+        OtamLogger::verbose("HTTP POST: " + url);
 
         http.addHeader("Content-Type", "application/json");
 

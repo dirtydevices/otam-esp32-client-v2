@@ -18,34 +18,34 @@ public:
 
             if (written == contentLength)
             {
-                Serial.println("Written : " + String(written) + " successfully");
+                OtamLogger::info("Written : " + String(written) + " successfully");
             }
             else
             {
-                Serial.println("Written only : " + String(written) + "/" + String(contentLength) + ". Retry?");
+                OtamLogger::info("Written only : " + String(written) + "/" + String(contentLength) + ". Retry?");
             }
 
             if (Update.end())
             {
-                Serial.println("OTA done!");
+                OtamLogger::info("OTA done!");
                 if (Update.isFinished())
                 {
-                    Serial.println("Update successfully completed. Rebooting.");
+                    OtamLogger::info("Update successfully completed. Rebooting.");
                     ESP.restart();
                 }
                 else
                 {
-                    Serial.println("Update not finished? Something went wrong!");
+                    OtamLogger::error("Update not finished? Something went wrong!");
                 }
             }
             else
             {
-                Serial.println("Error Occurred. Error #: " + String(Update.getError()));
+                OtamLogger::error("Error Occurred. Error #: " + String(Update.getError()));
             }
         }
         else
         {
-            Serial.println("Not enough space to begin OTA");
+            OtamLogger::error("Not enough space to begin OTA");
         }
     }
 };

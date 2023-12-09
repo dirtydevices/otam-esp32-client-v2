@@ -1,3 +1,4 @@
+#include <HttpClient.h>
 #include "internal/OtamConfig.h"
 #include "internal/OtamLogger.h"
 #include "internal/OtamHttp.h"
@@ -64,9 +65,15 @@ public:
 
         HTTPClient http;
 
+        OtamLogger::debug("Downloading firmware from: " + otamDevice->deviceDownloadUrl);
+
         http.begin(otamDevice->deviceDownloadUrl);
 
+        OtamLogger::debug("HTTP GET: " + otamDevice->deviceDownloadUrl);
+
         int httpCode = http.GET();
+
+        OtamLogger::debug("HTTP GET response code: " + String(httpCode));
 
         if (httpCode == HTTP_CODE_NO_CONTENT) // Status 204: Firmware already up to date
         {
@@ -75,11 +82,13 @@ public:
         }
         else if (httpCode == HTTP_CODE_OK) // Status 200: Download available
         {
+            OtamLogger::info("New firmware available");
             OtamUpdater::runESP32Update(http);
         }
         else
         {
-            throw std::runtime_error("Firmware download failed, error: " + httpCode);
+            OtamLogger::error("Firmware download failed, error: " + String(httpCode));
+            throw std::runtime_error("Firmware download failed.");
         }
     }
 };
