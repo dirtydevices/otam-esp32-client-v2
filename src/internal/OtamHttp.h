@@ -13,36 +13,44 @@ public:
     {
         HTTPClient http;
 
-        http.begin(url);
-
-        OtamLogger::verbose("HTTP GET: " + url);
-
-        int httpCode = http.GET();
-
-        OtamLogger::verbose("HTTP GET response code: " + String(httpCode));
-
-        if (httpCode == HTTP_CODE_OK)
+        try
         {
-            OtamLogger::verbose("HTTP GET successful");
+            http.begin(url);
 
-            String payload = http.getString();
+            OtamLogger::verbose("HTTP GET: " + url);
 
-            if (!payload.isEmpty())
+            int httpCode = http.GET();
+
+            OtamLogger::verbose("HTTP GET response code: " + String(httpCode));
+
+            if (httpCode == HTTP_CODE_OK)
             {
-                OtamLogger::verbose("HTTP GET response payload: " + payload);
+                OtamLogger::verbose("HTTP GET successful");
+
+                String payload = http.getString();
+
+                if (!payload.isEmpty())
+                {
+                    OtamLogger::verbose("HTTP GET response payload: " + payload);
+                }
+
+                http.end();
+
+                return {httpCode, payload};
             }
-
-            http.end();
-
-            return {httpCode, payload};
+            else
+            {
+                String resPayload = http.getString();
+                OtamLogger::error("HTTP POST failed, error: " + String(httpCode));
+                OtamLogger::error("HTTP POST payload: " + resPayload);
+                throw std::runtime_error("HTTP GET failed, error: " + std::to_string(httpCode));
+            }
         }
-        else
+        catch (const std::exception &e)
         {
-            String resPayload = http.getString();
             http.end();
-            OtamLogger::error("HTTP POST failed, error: " + String(httpCode));
-            OtamLogger::error("HTTP POST payload: " + resPayload);
-            throw std::runtime_error("HTTP GET failed, error: " + std::to_string(httpCode));
+            OtamLogger::error("Exception in HTTP GET: " + String(e.what()));
+            throw std::runtime_error("Exception in HTTP GET Request");
         }
     }
 
@@ -50,36 +58,44 @@ public:
     {
         HTTPClient http;
 
-        http.begin(url);
-
-        OtamLogger::verbose("HTTP POST: " + url);
-
-        http.addHeader("Content-Type", "application/json");
-
-        int httpCode = http.POST(payload);
-
-        OtamLogger::verbose("HTTP POST response code: " + String(httpCode));
-
-        if (httpCode >= 200 && httpCode < 300)
+        try
         {
-            String resPayload = http.getString();
+            http.begin(url);
 
-            if (!resPayload.isEmpty())
+            OtamLogger::verbose("HTTP POST: " + url);
+
+            http.addHeader("Content-Type", "application/json");
+
+            int httpCode = http.POST(payload);
+
+            OtamLogger::verbose("HTTP POST response code: " + String(httpCode));
+
+            if (httpCode >= 200 && httpCode < 300)
             {
-                OtamLogger::verbose("HTTP POST response payload: " + resPayload);
+                String resPayload = http.getString();
+
+                if (!resPayload.isEmpty())
+                {
+                    OtamLogger::verbose("HTTP POST response payload: " + resPayload);
+                }
+
+                http.end();
+
+                return {httpCode, payload : resPayload};
             }
-
-            http.end();
-
-            return {httpCode, payload : resPayload};
+            else
+            {
+                String resPayload = http.getString();
+                OtamLogger::error("HTTP POST failed, error: " + String(httpCode));
+                OtamLogger::error("HTTP POST payload: " + resPayload);
+                throw std::runtime_error("HTTP POST failed, error: " + std::to_string(httpCode));
+            }
         }
-        else
+        catch (const std::exception &e)
         {
-            String resPayload = http.getString();
             http.end();
-            OtamLogger::error("HTTP POST failed, error: " + String(httpCode));
-            OtamLogger::error("HTTP POST payload: " + resPayload);
-            throw std::runtime_error("HTTP POST failed, error: " + std::to_string(httpCode));
+            OtamLogger::error("Exception in HTTP POST: " + String(e.what()));
+            throw std::runtime_error("Exception in HTTP POST Request");
         }
     }
 };

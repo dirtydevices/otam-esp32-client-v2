@@ -175,6 +175,7 @@ public:
     static void writeFirmwareUpdateStatusToStore(String firmwareUpdateStatus)
     {
         Preferences preferences;
+
         if (!preferences.begin("otam-store", false))
         {
             throw std::runtime_error("Failed to initialize NVS");
