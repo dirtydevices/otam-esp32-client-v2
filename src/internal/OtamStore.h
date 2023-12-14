@@ -30,7 +30,16 @@ public:
             throw std::runtime_error("Failed to initialize NVS");
         }
 
-        if (!preferences.putString("device_id", deviceId))
+        if (deviceId.length() == 0)
+        {
+            if (!preferences.remove("device_id"))
+            {
+                throw std::runtime_error("Failed to remove device ID from NVS");
+                preferences.end();
+                return;
+            }
+        }
+        else if (!preferences.putString("device_id", deviceId))
         {
             throw std::runtime_error("Failed to write device ID to NVS");
             preferences.end();

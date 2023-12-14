@@ -12,8 +12,11 @@ private:
         OtamLogger::debug("Device id written to store: " + id);
     }
 
-    void setDeviceId(OtamConfig config)
+    void initialize(OtamConfig config)
     {
+        // writeIdToStore("");
+        OtamLogger::info("Initializing device with OTAM server");
+
         String initDeviceId = "";
         String deviceIdOrigin = "";
 
@@ -33,21 +36,20 @@ private:
 
         if (response.httpCode == 200)
         {
-            // Updated
+            // Device found in OTAM DB
             deviceId = response.payload;
-            OtamLogger::info("Device id initialized: " + deviceId);
         }
         else if (response.httpCode == 201)
         {
             // Created
             deviceId = response.payload;
-            OtamLogger::info("Device id created and initialized: " + deviceId);
+            OtamLogger::info("New device created on OTAM server: " + deviceId);
         }
         else
         {
             // Error
             OtamLogger::error("Setting device id failed with status code " + String(response.httpCode));
-            throw std::runtime_error("Set device id failed.");
+            throw std::runtime_error("Set device id failed");
         }
 
         if (deviceId != deviceIdStore)
@@ -58,36 +60,8 @@ private:
         {
             OtamLogger::debug("Device id already in store: " + deviceId);
         }
-    }
-    void initialize(OtamConfig config)
-    {
-        // Set the device id
-        setDeviceId(config);
 
-        OtamLogger::info("Initializing device with OTAM server");
-
-        // Create the payload
-        String payload = "{\"deviceName\":\"" + deviceName + "\"}";
-
-        // Register the device
-        OtamHttpResponse response = OtamHttp::post(deviceInitializeUrl, payload);
-
-        // Check the response code
-        if (response.httpCode == 204)
-        {
-            OtamLogger::debug("Device already registered and nothing to update.");
-        }
-        else if (response.httpCode >= 200 && response.httpCode < 300)
-        {
-            // Log the response
-            OtamLogger::info(response.payload);
-        }
-        else
-        {
-            OtamLogger::error("Device initalization failed with status code " + String(response.httpCode));
-            OtamLogger::error(response.payload);
-            throw std::runtime_error("Device init failed.");
-        }
+        OtamLogger::info("Device has been initialized with OTAM server");
     }
 
 public:
