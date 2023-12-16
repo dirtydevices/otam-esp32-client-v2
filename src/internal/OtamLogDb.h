@@ -1,13 +1,12 @@
+#include "internal/OtamHttp.h"
+
 class OtamLogDb
 {
 private:
     String url;
 
 public:
-    OtamLogDb(String url)
-    {
-        this->url = url;
-    }
+    OtamLogDb(String url) { this->url = url; }
 
     void debug(String message)
     {

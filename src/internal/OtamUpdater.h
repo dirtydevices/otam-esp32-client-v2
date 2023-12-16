@@ -1,6 +1,7 @@
-#include <functional>
 #include <HTTPClient.h>
 #include <Update.h>
+#include <functional>
+#include "internal/OtamLogger.h"
 
 class OtamUpdater
 {
@@ -12,15 +13,9 @@ public:
     CallbackType otaSuccessCallback;
     CallbackType otaErrorCallback;
 
-    void onOtaSuccess(CallbackType successCallback)
-    {
-        otaSuccessCallback = successCallback;
-    }
+    void onOtaSuccess(CallbackType successCallback) { otaSuccessCallback = successCallback; }
 
-    void onOtaError(CallbackType errorCallback)
-    {
-        otaErrorCallback = errorCallback;
-    }
+    void onOtaError(CallbackType errorCallback) { otaErrorCallback = errorCallback; }
 
     void runESP32Update(HTTPClient &http)
     {

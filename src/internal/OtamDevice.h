@@ -1,7 +1,9 @@
 #include "internal/OtamLogDb.h"
-#include "internal/OtamUtils.h"
 #include "internal/OtamStore.h"
 #include "internal/OtamUpdater.h"
+#include "internal/OtamUtils.h"
+#include "internal/OtamHttp.h"
+#include "internal/OtamLogger.h"
 
 class OtamDevice
 {
@@ -14,7 +16,7 @@ private:
 
     void initialize(OtamConfig config)
     {
-        // writeIdToStore("");
+        writeIdToStore("");
         OtamLogger::info("Initializing device with OTAM server");
 
         String initDeviceId = "";
@@ -29,7 +31,9 @@ private:
         }
 
         String initUrl = config.url + "/init-device";
-        String payload = "{\"deviceName\":\"" + config.deviceName + "\", \"deviceIdStore\":\"" + deviceIdStore + "\", \"deviceIdConfig\":\"" + config.deviceId + "\", \"generateDeviceId\":" + String(config.regenerateDeviceId) + "}";
+        String payload = "{\"deviceName\":\"" + config.deviceName + "\", \"deviceIdStore\":\"" + deviceIdStore +
+                         "\", \"deviceIdConfig\":\"" + config.deviceId + "\", \"generateDeviceId\":" + String(config.regenerateDeviceId) +
+                         "}";
 
         // Call the init endpoint
         OtamHttpResponse response = OtamHttp::post(initUrl, payload);

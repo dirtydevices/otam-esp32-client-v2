@@ -1,46 +1,36 @@
 #include <Preferences.h>
 
-class OtamStore
-{
-public:
-    static String readDeviceIdFromStore()
-    {
+class OtamStore {
+   public:
+    static String readDeviceIdFromStore() {
         Preferences preferences;
-        if (!preferences.begin("otam-store", false))
-        {
+        if (!preferences.begin("otam-store", false)) {
             throw std::runtime_error("Failed to initialize NVS");
         }
 
         String deviceId;
 
-        if (preferences.isKey("device_id"))
-        {
-            deviceId = preferences.getString("device_id"); // Try to read the device ID from NVS
+        if (preferences.isKey("device_id")) {
+            deviceId = preferences.getString("device_id");  // Try to read the device ID from NVS
         }
 
         preferences.end();
         return deviceId;
     }
 
-    static void writeDeviceIdToStore(String deviceId)
-    {
+    static void writeDeviceIdToStore(String deviceId) {
         Preferences preferences;
-        if (!preferences.begin("otam-store", false))
-        {
+        if (!preferences.begin("otam-store", false)) {
             throw std::runtime_error("Failed to initialize NVS");
         }
 
-        if (deviceId.length() == 0)
-        {
-            if (!preferences.remove("device_id"))
-            {
+        if (deviceId.length() == 0) {
+            if (!preferences.remove("device_id")) {
                 throw std::runtime_error("Failed to remove device ID from NVS");
                 preferences.end();
                 return;
             }
-        }
-        else if (!preferences.putString("device_id", deviceId))
-        {
+        } else if (!preferences.putString("device_id", deviceId)) {
             throw std::runtime_error("Failed to write device ID to NVS");
             preferences.end();
             return;
@@ -49,27 +39,22 @@ public:
         preferences.end();
     }
 
-    static void writeFirmwareUpdateFileIdToStore(int firmwareUpdateFileId)
-    {
+    static void writeFirmwareUpdateFileIdToStore(int firmwareUpdateFileId) {
         Preferences preferences;
-        if (!preferences.begin("otam-store", false))
-        {
+        if (!preferences.begin("otam-store", false)) {
             throw std::runtime_error("Failed to initialize NVS");
         }
 
-        if (preferences.putInt("file_id", firmwareUpdateFileId) == 0)
-        {
+        if (preferences.putInt("file_id", firmwareUpdateFileId) == 0) {
             throw std::runtime_error("Failed to write firmware file update ID to NVS");
         }
 
         preferences.end();
     }
 
-    static int readFirmwareUpdateFileIdFromStore()
-    {
+    static int readFirmwareUpdateFileIdFromStore() {
         Preferences preferences;
-        if (!preferences.begin("otam-store", false))
-        {
+        if (!preferences.begin("otam-store", false)) {
             throw std::runtime_error("Failed to initialize NVS");
         }
 
@@ -78,27 +63,22 @@ public:
         return firmwareUpdateFileId;
     }
 
-    static void writeFirmwareUpdateIdToStore(int firmwareUpdateId)
-    {
+    static void writeFirmwareUpdateIdToStore(int firmwareUpdateId) {
         Preferences preferences;
-        if (!preferences.begin("otam-store", false))
-        {
+        if (!preferences.begin("otam-store", false)) {
             throw std::runtime_error("Failed to initialize NVS");
         }
 
-        if (preferences.putInt("firmware_id", firmwareUpdateId) == 0)
-        {
+        if (preferences.putInt("firmware_id", firmwareUpdateId) == 0) {
             throw std::runtime_error("Failed to write firmware update ID to NVS");
         }
 
         preferences.end();
     }
 
-    static int readFirmwareUpdateIdFromStore()
-    {
+    static int readFirmwareUpdateIdFromStore() {
         Preferences preferences;
-        if (!preferences.begin("otam-store", false))
-        {
+        if (!preferences.begin("otam-store", false)) {
             throw std::runtime_error("Failed to initialize NVS");
         }
 
@@ -107,16 +87,13 @@ public:
         return firmwareUpdateId;
     }
 
-    static void writeFirmwareUpdateNameToStore(String firmwareUpdateName)
-    {
+    static void writeFirmwareUpdateNameToStore(String firmwareUpdateName) {
         Preferences preferences;
-        if (!preferences.begin("otam-store", false))
-        {
+        if (!preferences.begin("otam-store", false)) {
             throw std::runtime_error("Failed to initialize NVS");
         }
 
-        if (!preferences.putString("firmware_name", firmwareUpdateName))
-        {
+        if (!preferences.putString("firmware_name", firmwareUpdateName)) {
             throw std::runtime_error("Failed to write firmware update name to NVS");
             preferences.end();
             return;
@@ -125,35 +102,29 @@ public:
         preferences.end();
     }
 
-    static String readFirmwareUpdateNameFromStore()
-    {
+    static String readFirmwareUpdateNameFromStore() {
         Preferences preferences;
-        if (!preferences.begin("otam-store", false))
-        {
+        if (!preferences.begin("otam-store", false)) {
             throw std::runtime_error("Failed to initialize NVS");
         }
 
         String firmwareUpdateName;
 
-        if (preferences.isKey("firmware_name"))
-        {
-            firmwareUpdateName = preferences.getString("firmware_name"); // Try to read the device ID from NVS
+        if (preferences.isKey("firmware_name")) {
+            firmwareUpdateName = preferences.getString("firmware_name");  // Try to read the device ID from NVS
         }
 
         preferences.end();
         return firmwareUpdateName;
     }
 
-    static void writeFirmwareUpdateVersionToStore(String firmwareUpdateVersion)
-    {
+    static void writeFirmwareUpdateVersionToStore(String firmwareUpdateVersion) {
         Preferences preferences;
-        if (!preferences.begin("otam-store", false))
-        {
+        if (!preferences.begin("otam-store", false)) {
             throw std::runtime_error("Failed to initialize NVS");
         }
 
-        if (!preferences.putString("fw_version", firmwareUpdateVersion))
-        {
+        if (!preferences.putString("fw_version", firmwareUpdateVersion)) {
             throw std::runtime_error("Failed to write firmware update version to NVS");
             preferences.end();
             return;
@@ -162,36 +133,30 @@ public:
         preferences.end();
     }
 
-    static String readFirmwareUpdateVersionFromStore()
-    {
+    static String readFirmwareUpdateVersionFromStore() {
         Preferences preferences;
-        if (!preferences.begin("otam-store", false))
-        {
+        if (!preferences.begin("otam-store", false)) {
             throw std::runtime_error("Failed to initialize NVS");
         }
 
         String firmwareUpdateVersion;
 
-        if (preferences.isKey("fw_version"))
-        {
-            firmwareUpdateVersion = preferences.getString("fw_version"); // Try to read the device ID from NVS
+        if (preferences.isKey("fw_version")) {
+            firmwareUpdateVersion = preferences.getString("fw_version");  // Try to read the device ID from NVS
         }
 
         preferences.end();
         return firmwareUpdateVersion;
     }
 
-    static void writeFirmwareUpdateStatusToStore(String firmwareUpdateStatus)
-    {
+    static void writeFirmwareUpdateStatusToStore(String firmwareUpdateStatus) {
         Preferences preferences;
 
-        if (!preferences.begin("otam-store", false))
-        {
+        if (!preferences.begin("otam-store", false)) {
             throw std::runtime_error("Failed to initialize NVS");
         }
 
-        if (!preferences.putString("fw_status", firmwareUpdateStatus))
-        {
+        if (!preferences.putString("fw_status", firmwareUpdateStatus)) {
             throw std::runtime_error("Failed to write firmware update status to NVS");
             preferences.end();
             return;
@@ -200,19 +165,16 @@ public:
         preferences.end();
     }
 
-    static String readFirmwareUpdateStatusFromStore()
-    {
+    static String readFirmwareUpdateStatusFromStore() {
         Preferences preferences;
-        if (!preferences.begin("otam-store", false))
-        {
+        if (!preferences.begin("otam-store", false)) {
             throw std::runtime_error("Failed to initialize NVS");
         }
 
         String firmwareUpdateStatus;
 
-        if (preferences.isKey("fw_status"))
-        {
-            firmwareUpdateStatus = preferences.getString("fw_status"); // Try to read the device ID from NVS
+        if (preferences.isKey("fw_status")) {
+            firmwareUpdateStatus = preferences.getString("fw_status");  // Try to read the device ID from NVS
         }
 
         preferences.end();

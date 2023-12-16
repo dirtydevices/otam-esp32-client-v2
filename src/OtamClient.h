@@ -1,6 +1,6 @@
 #include <HttpClient.h>
-#include "internal/OtamConfig.h"
 #include "internal/OtamLogger.h"
+#include "internal/OtamConfig.h"
 #include "internal/OtamHttp.h"
 #include "internal/OtamDevice.h"
 
@@ -28,16 +28,10 @@ public:
     CallbackType otaErrorCallback;
 
     // Subscribe to the OTA success callback
-    void onOtaSuccess(CallbackType successCallback)
-    {
-        otaSuccessCallback = successCallback;
-    }
+    void onOtaSuccess(CallbackType successCallback) { otaSuccessCallback = successCallback; }
 
     // Subscribe to the OTA error callback
-    void onOtaError(CallbackType errorCallback)
-    {
-        otaErrorCallback = errorCallback;
-    }
+    void onOtaError(CallbackType errorCallback) { otaErrorCallback = errorCallback; }
 
     // Set the log level
     void setLogLevel(OtamLogLevel logLevel)
@@ -59,7 +53,9 @@ public:
         OtamLogger::verbose("OtamClient Contrcutor: Store -> Firmware update status: " + firmwareUpdateStatus);
         if (firmwareUpdateStatus == "UPDATE_SUCCESS")
         {
-            OtamLogger::debug("Firmware update status is UPDATE_SUCCESS, calling OTA success callback");
+            OtamLogger::debug(
+                "Firmware update status is UPDATE_SUCCESS, calling OTA success "
+                "callback");
             FirmwareUpdateValues firmwareUpdateSuccessValues;
             firmwareUpdateSuccessValues.firmwareFileId = OtamStore::readFirmwareUpdateFileIdFromStore();
             firmwareUpdateSuccessValues.firmwareId = OtamStore::readFirmwareUpdateIdFromStore();
@@ -159,25 +155,33 @@ public:
 
         OtamLogger::debug("HTTP GET response code: " + String(httpCode));
 
-        if (httpCode == HTTP_CODE_NO_CONTENT) // Status 204: Firmware already up to date
+        if (httpCode == HTTP_CODE_NO_CONTENT)
         {
+            // Status 204: Firmware already up to date
+
             updateStarted = false;
             OtamLogger::info("No new firmware available");
             return;
         }
-        else if (httpCode == HTTP_CODE_OK) // Status 200: Download available
+        else if (httpCode == HTTP_CODE_OK)
         {
+            // Status 200: Download available
+
             OtamLogger::info("New firmware available");
+
             OtamUpdater *otamUpdater = new OtamUpdater();
+
             otamUpdater->onOtaSuccess([this]()
                                       {
                 OtamLogger::info("OTA success callback called");
-                
+
                 OtamLogger::debug("Notifying OTAM server of successful update");
-                
+
                 // Create the payload with status and file ID
-                String payload = "{\"deviceStatus\":\"UPDATE_SUCCESS\",\"firmwareFileId\":" + String(firmwareUpdateValues.firmwareFileId) + ",\"firmwareId\":" + String(firmwareUpdateValues.firmwareId) + ",\"firmwareVersion\":\"" + firmwareUpdateValues.firmwareVersion + "\"}";
-                
+                String payload = "{\"deviceStatus\":\"UPDATE_SUCCESS\",\"firmwareFileId\":" + String(firmwareUpdateValues.firmwareFileId) +
+                                 ",\"firmwareId\":" + String(firmwareUpdateValues.firmwareId) + ",\"firmwareVersion\":\"" +
+                                 firmwareUpdateValues.firmwareVersion + "\"}";
+
                 // Update device on the server
                 OtamHttpResponse response = OtamHttp::post(otamDevice->deviceStatusUrl, payload);
 
@@ -185,14 +189,14 @@ public:
                 OtamStore::writeFirmwareUpdateFileIdToStore(firmwareUpdateValues.firmwareFileId);
                 OtamLogger::debug("Firmware update file ID stored: " + String(firmwareUpdateValues.firmwareFileId));
 
-                // Store the updated firmware id 
+                // Store the updated firmware id
                 OtamStore::writeFirmwareUpdateIdToStore(firmwareUpdateValues.firmwareId);
                 OtamLogger::debug("Firmware update ID stored: " + String(firmwareUpdateValues.firmwareId));
-                
+
                 // Store the updated firmware name
                 OtamStore::writeFirmwareUpdateNameToStore(firmwareUpdateValues.firmwareName);
                 OtamLogger::debug("Firmware update name stored: " + firmwareUpdateValues.firmwareName);
-                
+
                 // Store the updated firmware version
                 OtamStore::writeFirmwareUpdateVersionToStore(firmwareUpdateValues.firmwareVersion);
                 OtamLogger::debug("Firmware update version stored: " + firmwareUpdateValues.firmwareVersion);
@@ -206,8 +210,8 @@ public:
 
             otamUpdater->onOtaError([this]()
                                     {
-                                        OtamLogger::error("OTA error callback called");
-                                        updateStarted = false; });
+                OtamLogger::error("OTA error callback called");
+                updateStarted = false; });
             otamUpdater->runESP32Update(http);
         }
         else
