@@ -12,6 +12,11 @@ void OtamClient::onOtaError(CallbackType errorCallback) {
 
 // Set the log level
 void OtamClient::setLogLevel(String logLevel) {
+    // Default value if nothing passed in
+    if (logLevel.isEmpty()) {
+        logLevel = "LOG_LEVEL_INFO";
+    }
+
     if (logLevel == "LOG_LEVEL_VERBOSE") {
         Serial.println("OTAM: Setting log level to: LOG_LEVEL_VERBOSE");
         OtamLogger::setLogLevel(LOG_LEVEL_VERBOSE);
@@ -29,16 +34,42 @@ void OtamClient::setLogLevel(String logLevel) {
         OtamLogger::setLogLevel(LOG_LEVEL_ERROR);
     } else {
         Serial.println("OTAM: Setting log level to: LOG_LEVEL_NONE");
-        OtamLogger::setLogLevel(LOG_LEVEL_NONE);  // Default value
+        OtamLogger::setLogLevel(LOG_LEVEL_NONE);
+    }
+}
+
+// Read firmware values from store
+FirmwareUpdateValues OtamClient::readFirmwareValuesFromStore() {
+    FirmwareUpdateValues firmwareValuesInStore;
+    firmwareValuesInStore.firmwareFileId = OtamStore::readFirmwareUpdateFileIdFromStore();
+    firmwareValuesInStore.firmwareId = OtamStore::readFirmwareUpdateIdFromStore();
+    firmwareValuesInStore.firmwareName = OtamStore::readFirmwareUpdateNameFromStore();
+    firmwareValuesInStore.firmwareVersion = OtamStore::readFirmwareUpdateVersionFromStore();
+    return firmwareValuesInStore;
+}
+
+OtamClient::OtamClient(const OtamConfig& config) {
+    clientOtamConfig = config;
+    setLogLevel(config.logLevel);
+    OtamLogger::info("OTAM client loaded");
+    FirmwareUpdateValues firmwareValuesInStore = readFirmwareValuesFromStore();
+    OtamLogger::debug("Firmware file ID in store: " + String(firmwareValuesInStore.firmwareFileId));
+    if (firmwareValuesInStore.firmwareFileId != 0) {
+        Serial.println("");
+        OtamLogger::info("OTAM Firmware Info");
+        OtamLogger::info("------------------");
+        OtamLogger::info("Firmware name: " + firmwareValuesInStore.firmwareName);
+        OtamLogger::info("Fimrware version: " + firmwareValuesInStore.firmwareVersion);
+        Serial.println("");
     }
 }
 
 // Initialize the OTAM client
-void OtamClient::initialize(OtamConfig config) {
+void OtamClient::initialize() {
     OtamLogger::debug("Initializing OTAM client");
 
     // Create the device
-    otamDevice = new OtamDevice(config);
+    otamDevice = new OtamDevice(clientOtamConfig);
 
     // If firmware update status success, publish to success callback
     String firmwareUpdateStatus = OtamStore::readFirmwareUpdateStatusFromStore();
@@ -47,11 +78,7 @@ void OtamClient::initialize(OtamConfig config) {
         OtamLogger::debug(
             "Firmware update status is UPDATE_SUCCESS, calling OTA success "
             "callback");
-        FirmwareUpdateValues firmwareUpdateSuccessValues;
-        firmwareUpdateSuccessValues.firmwareFileId = OtamStore::readFirmwareUpdateFileIdFromStore();
-        firmwareUpdateSuccessValues.firmwareId = OtamStore::readFirmwareUpdateIdFromStore();
-        firmwareUpdateSuccessValues.firmwareName = OtamStore::readFirmwareUpdateNameFromStore();
-        firmwareUpdateSuccessValues.firmwareVersion = OtamStore::readFirmwareUpdateVersionFromStore();
+        FirmwareUpdateValues firmwareUpdateSuccessValues = readFirmwareValuesFromStore();
 
         // Clear the firmware update status
         OtamStore::writeFirmwareUpdateStatusToStore("NONE");
@@ -84,7 +111,13 @@ OtamHttpResponse OtamClient::logDeviceMessage(String message) {
 // Check if a firmware update is available
 boolean OtamClient::hasPendingUpdate() {
     if (!otamDevice) {
-        throw std::runtime_error("OTAM client not initialized");
+        try {
+            OtamLogger::debug("hasPendingUpdate() called, OTAM client not initialized");
+            initialize();
+        } catch (const std::runtime_error& e) {
+            OtamLogger::error("An OTAM error occurred: " + String(e.what()));
+            throw std::runtime_error("Could not initalize OTAM Client with server");
+        }
     }
 
     if (updateStarted) {
@@ -123,6 +156,16 @@ boolean OtamClient::hasPendingUpdate() {
 
 // Perform the firmware update
 void OtamClient::doFirmwareUpdate() {
+    if (!otamDevice) {
+        try {
+            OtamLogger::debug("doFirmwareUpdate() called, OTAM client not initialized");
+            initialize();
+        } catch (const std::runtime_error& e) {
+            OtamLogger::error("An OTAM error occurred: " + String(e.what()));
+            throw std::runtime_error("Could not initalize OTAM Client with server");
+        }
+    }
+
     updateStarted = true;
 
     OtamLogger::info("Firmware update started");
@@ -158,16 +201,18 @@ void OtamClient::doFirmwareUpdate() {
             OtamLogger::debug("Notifying OTAM server of successful update");
 
             // Create the payload with status and file ID
-            String payload = "{\"deviceStatus\":\"UPDATE_SUCCESS\",\"firmwareFileId\":" + String(firmwareUpdateValues.firmwareFileId) +
-                             ",\"firmwareId\":" + String(firmwareUpdateValues.firmwareId) + ",\"firmwareVersion\":\"" +
-                             firmwareUpdateValues.firmwareVersion + "\"}";
+            String payload = "{\"deviceStatus\":\"UPDATE_SUCCESS\",\"firmwareFileId\":" +
+                             String(firmwareUpdateValues.firmwareFileId) +
+                             ",\"firmwareId\":" + String(firmwareUpdateValues.firmwareId) +
+                             ",\"firmwareVersion\":\"" + firmwareUpdateValues.firmwareVersion + "\"}";
 
             // Update device on the server
             OtamHttpResponse response = OtamHttp::post(otamDevice->deviceStatusUrl, payload);
 
             // Store the updated firmware file id
             OtamStore::writeFirmwareUpdateFileIdToStore(firmwareUpdateValues.firmwareFileId);
-            OtamLogger::debug("Firmware update file ID stored: " + String(firmwareUpdateValues.firmwareFileId));
+            OtamLogger::debug("Firmware update file ID stored: " +
+                              String(firmwareUpdateValues.firmwareFileId));
 
             // Store the updated firmware id
             OtamStore::writeFirmwareUpdateIdToStore(firmwareUpdateValues.firmwareId);

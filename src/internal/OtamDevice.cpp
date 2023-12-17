@@ -9,9 +9,6 @@ void OtamDevice::initialize(OtamConfig config) {
     // writeIdToStore("");
     OtamLogger::info("Initializing device with OTAM server");
 
-    String initDeviceId = "";
-    String deviceIdOrigin = "";
-
     // Read the device id from the store
     String deviceIdStore = OtamStore::readDeviceIdFromStore();
 
@@ -20,8 +17,9 @@ void OtamDevice::initialize(OtamConfig config) {
     }
 
     String initUrl = config.url + "/init-device";
-    String payload = "{\"deviceName\":\"" + config.deviceName + "\", \"deviceIdStore\":\"" + deviceIdStore + "\", \"deviceIdConfig\":\"" +
-                     config.deviceId + "\", \"generateDeviceId\":" + String(config.regenerateDeviceId) + "}";
+    String payload = "{\"deviceName\":\"" + config.deviceName + "\", \"deviceIdStore\":\"" + deviceIdStore +
+                     "\", \"deviceIdConfig\":\"" + config.deviceId +
+                     "\", \"generateDeviceId\":" + String(config.regenerateDeviceId) + "}";
 
     // Call the init endpoint
     OtamHttpResponse response = OtamHttp::post(initUrl, payload);

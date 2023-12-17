@@ -2,20 +2,19 @@
 #define OTAM_DEVICE_H
 
 #include "internal/OtamConfig.h"
+#include "internal/OtamHttp.h"
 #include "internal/OtamLogDb.h"
+#include "internal/OtamLogger.h"
 #include "internal/OtamStore.h"
 #include "internal/OtamUpdater.h"
 #include "internal/OtamUtils.h"
-#include "internal/OtamHttp.h"
-#include "internal/OtamLogger.h"
 
-class OtamDevice
-{
-private:
+class OtamDevice {
+   private:
     void writeIdToStore(String id);
     void initialize(OtamConfig config);
 
-public:
+   public:
     String deviceId;
     String deviceName;
     String deviceUrl;
@@ -23,8 +22,8 @@ public:
     String deviceStatusUrl;
     String deviceInitializeUrl;
     String deviceDownloadUrl;
-    OtamLogDb *logDb;
+    OtamLogDb* logDb;
     OtamDevice(OtamConfig config);
 };
 
-#endif // OTAM_DEVICE_H
+#endif  // OTAM_DEVICE_H

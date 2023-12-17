@@ -16,18 +16,21 @@ struct FirmwareUpdateValues {
 
 class OtamClient {
    private:
+    OtamConfig clientOtamConfig;
     OtamDevice* otamDevice;
     bool updateStarted = false;
     FirmwareUpdateValues firmwareUpdateValues;
+    FirmwareUpdateValues readFirmwareValuesFromStore();
 
    public:
+    OtamClient(const OtamConfig& config);
     using CallbackType = std::function<void(FirmwareUpdateValues)>;
     CallbackType otaSuccessCallback;
     CallbackType otaErrorCallback;
     void onOtaSuccess(CallbackType successCallback);
     void onOtaError(CallbackType errorCallback);
     void setLogLevel(String logLevel);
-    void initialize(OtamConfig config);
+    void initialize();
     OtamHttpResponse logDeviceMessage(String message);
     boolean hasPendingUpdate();
     void doFirmwareUpdate();
