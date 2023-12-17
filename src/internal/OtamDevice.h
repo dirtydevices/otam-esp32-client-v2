@@ -16,7 +16,7 @@ private:
 
     void initialize(OtamConfig config)
     {
-        writeIdToStore("");
+        // writeIdToStore("");
         OtamLogger::info("Initializing device with OTAM server");
 
         String initDeviceId = "";
