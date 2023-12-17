@@ -49,6 +49,7 @@ FirmwareUpdateValues OtamClient::readFirmwareValuesFromStore() {
 }
 
 OtamClient::OtamClient(const OtamConfig& config) {
+    Serial.println("");
     clientOtamConfig = config;
     setLogLevel(config.logLevel);
     OtamLogger::info("OTAM client loaded");
@@ -56,8 +57,8 @@ OtamClient::OtamClient(const OtamConfig& config) {
     OtamLogger::debug("Firmware file ID in store: " + String(firmwareValuesInStore.firmwareFileId));
     if (firmwareValuesInStore.firmwareFileId != 0) {
         Serial.println("");
-        OtamLogger::info("OTAM Firmware Info");
-        OtamLogger::info("------------------");
+        OtamLogger::info("OTAM Firmware Details");
+        OtamLogger::info("---------------------");
         OtamLogger::info("Firmware name: " + firmwareValuesInStore.firmwareName);
         OtamLogger::info("Fimrware version: " + firmwareValuesInStore.firmwareVersion);
         Serial.println("");
