@@ -3,9 +3,8 @@
 
 #include <Preferences.h>
 
-class OtamStore
-{
-public:
+class OtamStore {
+   public:
     static String readDeviceIdFromStore();
     static void writeDeviceIdToStore(String deviceId);
     static int readFirmwareUpdateFileIdFromStore();
@@ -20,4 +19,4 @@ public:
     static void writeFirmwareUpdateVersionToStore(String firmwareUpdateVersion);
 };
 
-#endif // OTAM_STORE_H
+#endif  // OTAM_STORE_H

@@ -6,9 +6,8 @@
 #include <functional>
 #include "internal/OtamLogger.h"
 
-class OtamUpdater
-{
-public:
+class OtamUpdater {
+   public:
     // Define the type for the callback functions
     using CallbackType = std::function<void()>;
 
@@ -18,7 +17,7 @@ public:
 
     void onOtaSuccess(CallbackType successCallback);
     void onOtaError(CallbackType errorCallback);
-    void runESP32Update(HTTPClient &http);
+    void runESP32Update(HTTPClient& http);
 };
 
-#endif // OTAM_UPDATER_H
+#endif  // OTAM_UPDATER_H

@@ -4,17 +4,15 @@
 #include <HttpClient.h>
 #include "internal/OtamLogger.h"
 
-struct OtamHttpResponse
-{
+struct OtamHttpResponse {
     int httpCode;
     String payload;
 };
 
-class OtamHttp
-{
-public:
+class OtamHttp {
+   public:
     static OtamHttpResponse get(String url);
     static OtamHttpResponse post(String url, String payload);
 };
 
-#endif // OTAM_HTTP_H
+#endif  // OTAM_HTTP_H

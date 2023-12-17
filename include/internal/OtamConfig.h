@@ -1,3 +1,6 @@
+#ifndef OTAM_CONFIG_H
+#define OTAM_CONFIG_H
+
 #include <Arduino.h>
 
 struct OtamFirmwareConfig {
@@ -12,3 +15,5 @@ struct OtamConfig {
     bool regenerateDeviceId = false;  // if true, device id will be regenerated on every boot
     OtamFirmwareConfig firmwareConfig;
 };
+
+#endif  // OTAM_CONFIG_H

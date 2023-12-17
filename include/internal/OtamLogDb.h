@@ -3,12 +3,11 @@
 
 #include "internal/OtamHttp.h"
 
-class OtamLogDb
-{
-private:
+class OtamLogDb {
+   private:
     String url;
 
-public:
+   public:
     OtamLogDb(String url);
 
     void debug(String message);
@@ -16,4 +15,4 @@ public:
     void error(String message);
 };
 
-#endif // OTAM_LOG_DB_H
+#endif  // OTAM_LOG_DB_H

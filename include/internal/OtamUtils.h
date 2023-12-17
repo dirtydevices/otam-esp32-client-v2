@@ -4,11 +4,10 @@
 #include <Arduino.h>
 #include <cJSON.h>
 
-class OtamUtils
-{
-public:
-    static cJSON *parseJSON(String json);
-    static String getJSONValue(cJSON *json, String key);
+class OtamUtils {
+   public:
+    static cJSON* parseJSON(String json);
+    static String getJSONValue(cJSON* json, String key);
 };
 
-#endif // OTAM_UTILS_H
+#endif  // OTAM_UTILS_H
