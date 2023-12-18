@@ -21,14 +21,16 @@ class OtamClient {
     bool updateStarted = false;
     FirmwareUpdateValues firmwareUpdateValues;
     FirmwareUpdateValues readFirmwareValuesFromStore();
+    void sendOtaUpdateError(String logMessage);
 
    public:
     OtamClient(const OtamConfig& config);
     using CallbackType = std::function<void(FirmwareUpdateValues)>;
+    using ErrorCallbackType = std::function<void(FirmwareUpdateValues, String)>;
     CallbackType otaSuccessCallback;
-    CallbackType otaErrorCallback;
+    ErrorCallbackType otaErrorCallback;
     void onOtaSuccess(CallbackType successCallback);
-    void onOtaError(CallbackType errorCallback);
+    void onOtaError(ErrorCallbackType errorCallback);
     void setLogLevel(String logLevel);
     void initialize();
     OtamHttpResponse logDeviceMessage(String message);

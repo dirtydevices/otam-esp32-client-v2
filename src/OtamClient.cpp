@@ -6,7 +6,7 @@ void OtamClient::onOtaSuccess(CallbackType successCallback) {
 }
 
 // Subscribe to the OTA error callback
-void OtamClient::onOtaError(CallbackType errorCallback) {
+void OtamClient::onOtaError(ErrorCallbackType errorCallback) {
     otaErrorCallback = errorCallback;
 }
 
@@ -46,6 +46,21 @@ FirmwareUpdateValues OtamClient::readFirmwareValuesFromStore() {
     firmwareValuesInStore.firmwareName = OtamStore::readFirmwareUpdateNameFromStore();
     firmwareValuesInStore.firmwareVersion = OtamStore::readFirmwareUpdateVersionFromStore();
     return firmwareValuesInStore;
+}
+
+void OtamClient::sendOtaUpdateError(String logMessage) {
+    String payload = "{\"deviceStatus\":\"UPDATE_FAILED\",\"firmwareFileId\":" +
+                     String(firmwareUpdateValues.firmwareFileId) +
+                     ",\"firmwareId\":" + String(firmwareUpdateValues.firmwareId) +
+                     ",\"firmwareVersion\":\"" + firmwareUpdateValues.firmwareVersion +
+                     "\",\"logMessage\":\"" + logMessage + "\"}";
+
+    OtamHttpResponse response = OtamHttp::post(otamDevice->deviceStatusUrl, payload);
+    if (response.httpCode >= 200 && response.httpCode < 300) {
+        OtamLogger::debug("OTA update error sent to server");
+    } else {
+        OtamLogger::error("OTA update error failed to send to server");
+    }
 }
 
 OtamClient::OtamClient(const OtamConfig& config) {
@@ -235,14 +250,21 @@ void OtamClient::doFirmwareUpdate() {
             ESP.restart();
         });
 
-        otamUpdater->onOtaError([this]() {
-            OtamLogger::error("OTA error callback called");
+        otamUpdater->onOtaError([this](String error) {
+            OtamLogger::verbose("OTA error callback called");
             updateStarted = false;
+            if (otaErrorCallback) {
+                otaErrorCallback(firmwareUpdateValues, error);
+            }
+            sendOtaUpdateError(error);
         });
         otamUpdater->runESP32Update(http);
     } else {
+        String error = "Firmware download failed, error: " + String(httpCode);
         updateStarted = false;
-        OtamLogger::error("Firmware download failed, error: " + String(httpCode));
-        throw std::runtime_error("Firmware download failed.");
+        if (otaErrorCallback) {
+            otaErrorCallback(firmwareUpdateValues, error);
+        }
+        sendOtaUpdateError(error);
     }
 }
