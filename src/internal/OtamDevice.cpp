@@ -2,7 +2,7 @@
 
 void OtamDevice::writeIdToStore(String id) {
     OtamStore::writeDeviceIdToStore(id);
-    OtamLogger::debug("Device id written to store: " + id);
+    OtamLogger::verbose("Device id written to store: " + id);
 }
 
 void OtamDevice::initialize(OtamConfig config) {
@@ -13,7 +13,7 @@ void OtamDevice::initialize(OtamConfig config) {
     String deviceIdStore = OtamStore::readDeviceIdFromStore();
 
     if (deviceIdStore != "") {
-        OtamLogger::debug("Device id read from store: " + deviceIdStore);
+        OtamLogger::verbose("Device id read from store: " + deviceIdStore);
     }
 
     String initUrl = config.url + "/init-device";
@@ -40,7 +40,7 @@ void OtamDevice::initialize(OtamConfig config) {
     if (deviceId != deviceIdStore) {
         writeIdToStore(deviceId);
     } else {
-        OtamLogger::debug("Device id already in store, no need to write: " + deviceId);
+        OtamLogger::verbose("Device id already in store, no need to write: " + deviceId);
     }
 
     OtamLogger::info("Device has been initialized with OTAM server");

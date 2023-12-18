@@ -7,15 +7,27 @@ void OtamLogger::setLogLevel(OtamLogLevel logLevel) {
     LOG_LEVEL = logLevel;
 }
 
-void OtamLogger::verbose(String message) {
-    if (LOG_LEVEL >= LOG_LEVEL_VERBOSE) {
-        Serial.println("OTAM [VERBOSE]: " + message);
+void OtamLogger::silly(String message) {
+    if (LOG_LEVEL >= LOG_LEVEL_SILLY) {
+        Serial.println("OTAM [SILLY]: " + message);
     }
 }
 
 void OtamLogger::debug(String message) {
     if (LOG_LEVEL >= LOG_LEVEL_DEBUG) {
         Serial.println("OTAM [DEBUG]: " + message);
+    }
+}
+
+void OtamLogger::verbose(String message) {
+    if (LOG_LEVEL >= LOG_LEVEL_VERBOSE) {
+        Serial.println("OTAM [VERBOSE]: " + message);
+    }
+}
+
+void OtamLogger::http(String message) {
+    if (LOG_LEVEL >= LOG_LEVEL_VERBOSE) {
+        Serial.println("OTAM [HTTP]: " + message);
     }
 }
 

@@ -7,19 +7,15 @@ OtamHttpResponse OtamHttp::get(String url) {
     try {
         http.begin(url);
 
-        OtamLogger::verbose("HTTP GET: " + url);
-
         int httpCode = http.GET();
 
-        OtamLogger::verbose("HTTP GET response code: " + String(httpCode));
+        OtamLogger::silly("HTTP GET [" + String(httpCode) + "] - " + url);
 
         if (httpCode == HTTP_CODE_OK) {
-            OtamLogger::verbose("HTTP GET successful");
-
             String payload = http.getString();
 
             if (!payload.isEmpty()) {
-                OtamLogger::verbose("HTTP GET response payload: " + payload);
+                OtamLogger::silly("HTTP GET response payload: " + payload);
             }
 
             http.end();
@@ -44,19 +40,17 @@ OtamHttpResponse OtamHttp::post(String url, String payload) {
     try {
         http.begin(url);
 
-        OtamLogger::verbose("HTTP POST: " + url);
-
         http.addHeader("Content-Type", "application/json");
 
         int httpCode = http.POST(payload);
 
-        OtamLogger::verbose("HTTP POST response code: " + String(httpCode));
+        OtamLogger::silly("HTTP POST [" + String(httpCode) + "] - " + url);
 
         if (httpCode >= 200 && httpCode < 300) {
             String resPayload = http.getString();
 
             if (!resPayload.isEmpty()) {
-                OtamLogger::verbose("HTTP POST response payload: " + resPayload);
+                OtamLogger::silly("HTTP POST response payload: " + resPayload);
             }
 
             http.end();
