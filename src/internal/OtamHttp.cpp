@@ -1,11 +1,14 @@
 #include "internal/OtamHttp.h"
 #include <HttpClient.h>
 
+String OtamHttp::apiKey;
+
 OtamHttpResponse OtamHttp::get(String url) {
     HTTPClient http;
 
     try {
         http.begin(url);
+        http.addHeader("x-api-key", apiKey);
 
         int httpCode = http.GET();
 
@@ -39,6 +42,7 @@ OtamHttpResponse OtamHttp::post(String url, String payload) {
 
     try {
         http.begin(url);
+        http.addHeader("x-api-key", apiKey);
 
         http.addHeader("Content-Type", "application/json");
 

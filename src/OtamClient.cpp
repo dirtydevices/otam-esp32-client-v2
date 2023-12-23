@@ -72,6 +72,7 @@ void OtamClient::sendOtaUpdateError(String logMessage) {
 OtamClient::OtamClient(const OtamConfig& config) {
     Serial.println("");
     clientOtamConfig = config;
+    OtamHttp::apiKey = config.apiKey;
     setLogLevel(config.logLevel);
     OtamLogger::info("OTAM client loaded");
     FirmwareUpdateValues firmwareValuesInStore = readFirmwareValuesFromStore();
@@ -197,6 +198,7 @@ void OtamClient::doFirmwareUpdate() {
     OtamLogger::verbose("Downloading firmware from: " + otamDevice->deviceDownloadUrl);
 
     http.begin(otamDevice->deviceDownloadUrl);
+    http.addHeader("x-api-key", clientOtamConfig.apiKey);
 
     OtamLogger::verbose("HTTP GET: " + otamDevice->deviceDownloadUrl);
 

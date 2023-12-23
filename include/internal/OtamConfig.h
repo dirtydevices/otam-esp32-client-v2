@@ -9,7 +9,8 @@ struct OtamFirmwareConfig {
 };
 
 struct OtamConfig {
-    String url = "";
+    String apiKey = "";      // user's api key
+    String url = "";         // base otam api url
     String deviceId = "";    // auto-generated if not provided
     String deviceName = "";  // initial name, name set in otam app takes precedence
     String logLevel = "LOG_LEVEL_INFO";
