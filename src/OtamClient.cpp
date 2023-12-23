@@ -77,14 +77,17 @@ OtamClient::OtamClient(const OtamConfig& config) {
     OtamLogger::info("OTAM client loaded");
     FirmwareUpdateValues firmwareValuesInStore = readFirmwareValuesFromStore();
     OtamLogger::verbose("Firmware file ID in store: " + String(firmwareValuesInStore.firmwareFileId));
-    if (firmwareValuesInStore.firmwareFileId != 0) {
-        Serial.println("");
-        OtamLogger::info("OTAM Firmware Details");
-        OtamLogger::info("---------------------");
-        OtamLogger::info("Firmware name: " + firmwareValuesInStore.firmwareName);
-        OtamLogger::info("Fimrware version: " + firmwareValuesInStore.firmwareVersion);
-        Serial.println("");
-    }
+
+    // Removing this since if uploaded by pc after an ota update
+    // these details will be wrong and could be confusing
+    // if (firmwareValuesInStore.firmwareFileId != 0) {
+    //     Serial.println("");
+    //     OtamLogger::info("OTAM Firmware Details");
+    //     OtamLogger::info("---------------------");
+    //     OtamLogger::info("Firmware name: " + firmwareValuesInStore.firmwareName);
+    //     OtamLogger::info("Fimrware version: " + firmwareValuesInStore.firmwareVersion);
+    //     Serial.println("");
+    // }
 }
 
 // Initialize the OTAM client
