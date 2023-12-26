@@ -17,6 +17,7 @@ struct FirmwareUpdateValues {
 class OtamClient {
    private:
     OtamConfig clientOtamConfig;
+    bool deviceInitialized = false;
     OtamDevice* otamDevice;
     bool updateStarted = false;
     FirmwareUpdateValues firmwareUpdateValues;

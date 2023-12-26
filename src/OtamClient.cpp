@@ -94,8 +94,14 @@ OtamClient::OtamClient(const OtamConfig& config) {
 void OtamClient::initialize() {
     OtamLogger::verbose("Initializing OTAM client");
 
-    // Create the device
-    otamDevice = new OtamDevice(clientOtamConfig);
+    try {
+        // Create the device
+        otamDevice = new OtamDevice(clientOtamConfig);
+        deviceInitialized = true;
+    } catch (const std::runtime_error& e) {
+        OtamLogger::error("An OTAM error occurred: " + String(e.what()));
+        throw std::runtime_error("Could not initalize OTAM Device");
+    }
 
     // If firmware update status success, publish to success callback
     String firmwareUpdateStatus = OtamStore::readFirmwareUpdateStatusFromStore();
@@ -136,9 +142,9 @@ OtamHttpResponse OtamClient::logDeviceMessage(String message) {
 
 // Check if a firmware update is available
 boolean OtamClient::hasPendingUpdate() {
-    if (!otamDevice) {
+    if (!deviceInitialized) {
         try {
-            OtamLogger::verbose("hasPendingUpdate() called, OTAM client not initialized");
+            OtamLogger::verbose("hasPendingUpdate() called but OTAM client not initialized");
             initialize();
         } catch (const std::runtime_error& e) {
             OtamLogger::error("An OTAM error occurred: " + String(e.what()));
