@@ -204,12 +204,27 @@ void OtamClient::doFirmwareUpdate() {
 
     HTTPClient http;
 
-    OtamLogger::verbose("Downloading firmware from: " + otamDevice->deviceDownloadUrl);
+    OtamLogger::verbose("Getting device firmware file url from: " + otamDevice->deviceFirmwareFileUrl);
 
-    http.begin(otamDevice->deviceDownloadUrl);
+    // Get the device status from the server
+    OtamHttpResponse response = OtamHttp::get(otamDevice->deviceFirmwareFileUrl);
+
+    if (response.httpCode != 200 || response.payload == "") {
+        String error = "Firmware file url request failed, error: " + String(response.httpCode);
+        updateStarted = false;
+        if (otaErrorCallback) {
+            otaErrorCallback(firmwareUpdateValues, error);
+        }
+        sendOtaUpdateError(error);
+        return;
+    }
+
+    OtamLogger::verbose("Downloading firmware file bin from: " + response.payload);
+
+    http.begin(response.payload);
     http.addHeader("x-api-key", clientOtamConfig.apiKey);
 
-    OtamLogger::verbose("HTTP GET: " + otamDevice->deviceDownloadUrl);
+    OtamLogger::verbose("HTTP GET: " + response.payload);
 
     int httpCode = http.GET();
 

@@ -63,7 +63,7 @@ OtamDevice::OtamDevice(OtamConfig config) {
     deviceStatusUrl = this->deviceUrl + "/status";
 
     // Set the device download URL
-    deviceDownloadUrl = this->deviceUrl + "/download";
+    deviceFirmwareFileUrl = this->deviceUrl + "/firmware-file-url";
 
     // Create the db logger
     logDb = new OtamLogDb(deviceLogUrl);

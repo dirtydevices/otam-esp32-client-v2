@@ -21,7 +21,7 @@ class OtamDevice {
     String deviceLogUrl;
     String deviceStatusUrl;
     String deviceInitializeUrl;
-    String deviceDownloadUrl;
+    String deviceFirmwareFileUrl;
     OtamLogDb* logDb;
     explicit OtamDevice(OtamConfig config);
 };
