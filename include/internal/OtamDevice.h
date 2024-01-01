@@ -23,7 +23,7 @@ class OtamDevice {
     String deviceInitializeUrl;
     String deviceDownloadUrl;
     OtamLogDb* logDb;
-    OtamDevice(OtamConfig config);
+    explicit OtamDevice(OtamConfig config);
 };
 
 #endif  // OTAM_DEVICE_H

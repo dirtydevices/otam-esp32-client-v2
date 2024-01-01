@@ -25,7 +25,7 @@ class OtamClient {
     void sendOtaUpdateError(String logMessage);
 
    public:
-    OtamClient(const OtamConfig& config);
+    explicit OtamClient(const OtamConfig& config);
     using CallbackType = std::function<void(FirmwareUpdateValues)>;
     using ErrorCallbackType = std::function<void(FirmwareUpdateValues, String)>;
     CallbackType otaSuccessCallback;

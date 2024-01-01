@@ -8,7 +8,7 @@ class OtamLogDb {
     String url;
 
    public:
-    OtamLogDb(String url);
+    explicit OtamLogDb(String url);
 
     void debug(String message);
     void info(String message);
