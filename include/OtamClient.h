@@ -26,11 +26,21 @@ class OtamClient {
 
    public:
     explicit OtamClient(const OtamConfig& config);
-    using CallbackType = std::function<void(FirmwareUpdateValues)>;
+    using EmptyCallbackType = std::function<void()>;
+    using StringCalbackType = std::function<void(String)>;
+    using SuccessCallbackType = std::function<void(FirmwareUpdateValues)>;
     using ErrorCallbackType = std::function<void(FirmwareUpdateValues, String)>;
-    CallbackType otaSuccessCallback;
+    StringCalbackType otaDownloadProgressCallback;
+    EmptyCallbackType otaBeforeDownloadCallback;
+    EmptyCallbackType otaAfterDownloadCallback;
+    EmptyCallbackType otaBeforeRebootCallback;
+    SuccessCallbackType otaSuccessCallback;
     ErrorCallbackType otaErrorCallback;
-    void onOtaSuccess(CallbackType successCallback);
+    void onOtaDownloadProgress(StringCalbackType progressCallback);
+    void onOtaBeforeDownload(EmptyCallbackType beforeDownloadCallback);
+    void onOtaAfterDownload(EmptyCallbackType afterDownloadCallback);
+    void onOtaBeforeReboot(EmptyCallbackType beforeRebootCallback);
+    void onOtaSuccess(SuccessCallbackType successCallback);
     void onOtaError(ErrorCallbackType errorCallback);
     void setLogLevel(String logLevel);
     void initialize();

@@ -1,7 +1,27 @@
 #include "OtamClient.h"
 
+// Subscribe to the OTA download progress callback
+void OtamClient::onOtaDownloadProgress(StringCalbackType progressCallback) {
+    otaDownloadProgressCallback = progressCallback;
+}
+
+// Subscribe to the OTA before download callback
+void OtamClient::onOtaBeforeDownload(EmptyCallbackType beforeDownloadCallback) {
+    otaBeforeDownloadCallback = beforeDownloadCallback;
+}
+
+// Subscribe to the OTA after download callback
+void OtamClient::onOtaAfterDownload(EmptyCallbackType afterDownloadCallback) {
+    otaAfterDownloadCallback = afterDownloadCallback;
+}
+
+// Subscribe to the OTA before reboot callback
+void OtamClient::onOtaBeforeReboot(EmptyCallbackType beforeRebootCallback) {
+    otaBeforeRebootCallback = beforeRebootCallback;
+}
+
 // Subscribe to the OTA success callback
-void OtamClient::onOtaSuccess(CallbackType successCallback) {
+void OtamClient::onOtaSuccess(SuccessCallbackType successCallback) {
     otaSuccessCallback = successCallback;
 }
 
@@ -19,28 +39,28 @@ void OtamClient::setLogLevel(String logLevel) {
 
     if (logLevel == "LOG_LEVEL_SILLY") {
         Serial.println("OTAM: Setting log level to: LOG_LEVEL_SILLY");
-        OtamLogger::setLogLevel(LOG_LEVEL_SILLY);
+        OtamLogger::setLogLevel(OtamLogLevel::LOG_LEVEL_SILLY);
     } else if (logLevel == "LOG_LEVEL_DEBUG") {
         Serial.println("OTAM: Setting log level to: LOG_LEVEL_DEBUG");
-        OtamLogger::setLogLevel(LOG_LEVEL_DEBUG);
+        OtamLogger::setLogLevel(OtamLogLevel::LOG_LEVEL_DEBUG);
     } else if (logLevel == "LOG_LEVEL_VERBOSE") {
         Serial.println("OTAM: Setting log level to: LOG_LEVEL_VERBOSE");
-        OtamLogger::setLogLevel(LOG_LEVEL_VERBOSE);
+        OtamLogger::setLogLevel(OtamLogLevel::LOG_LEVEL_VERBOSE);
     } else if (logLevel == "LOG_LEVEL_HTTP") {
         Serial.println("OTAM: Setting log level to: LOG_LEVEL_HTTP");
-        OtamLogger::setLogLevel(LOG_LEVEL_HTTP);
+        OtamLogger::setLogLevel(OtamLogLevel::LOG_LEVEL_HTTP);
     } else if (logLevel == "LOG_LEVEL_INFO") {
         Serial.println("OTAM: Setting log level to: LOG_LEVEL_INFO");
-        OtamLogger::setLogLevel(LOG_LEVEL_INFO);
+        OtamLogger::setLogLevel(OtamLogLevel::LOG_LEVEL_INFO);
     } else if (logLevel == "LOG_LEVEL_WARN") {
         Serial.println("OTAM: Setting log level to: LOG_LEVEL_WARN");
-        OtamLogger::setLogLevel(LOG_LEVEL_WARN);
+        OtamLogger::setLogLevel(OtamLogLevel::LOG_LEVEL_WARN);
     } else if (logLevel == "LOG_LEVEL_ERROR") {
         Serial.println("OTAM: Setting log level to: LOG_LEVEL_ERROR");
-        OtamLogger::setLogLevel(LOG_LEVEL_ERROR);
+        OtamLogger::setLogLevel(OtamLogLevel::LOG_LEVEL_ERROR);
     } else {
         Serial.println("OTAM: Setting log level to: LOG_LEVEL_NONE");
-        OtamLogger::setLogLevel(LOG_LEVEL_NONE);
+        OtamLogger::setLogLevel(OtamLogLevel::LOG_LEVEL_NONE);
     }
 }
 
@@ -230,14 +250,8 @@ void OtamClient::doFirmwareUpdate() {
 
     OtamLogger::verbose("HTTP GET response code: " + String(httpCode));
 
-    if (httpCode == HTTP_CODE_NO_CONTENT) {
-        // Status 204: Firmware already up to date
-
-        updateStarted = false;
-        OtamLogger::info("No new firmware available");
-        return;
-    } else if (httpCode == HTTP_CODE_OK) {
-        // Status 200: Download available
+    if (httpCode == HTTP_CODE_OK) {
+        // Status 200 : Download available
 
         OtamLogger::info("New firmware available");
 

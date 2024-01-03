@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-enum OtamLogLevel {
+enum class OtamLogLevel {
     LOG_LEVEL_NONE,
     LOG_LEVEL_ERROR,
     LOG_LEVEL_WARN,
