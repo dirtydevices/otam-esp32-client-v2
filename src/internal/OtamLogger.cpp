@@ -1,50 +1,56 @@
 #include "internal/OtamLogger.h"
 #include <Arduino.h>
 
-OtamLogLevel OtamLogger::LOG_LEVEL = OtamLogLevel::LOG_LEVEL_NONE;
+// Use the Otam namespace
+namespace Otam {
 
-void OtamLogger::setLogLevel(OtamLogLevel logLevel) {
+// Initialize LOG_LEVEL
+LogLevel Logger::LOG_LEVEL = LogLevel::NONE;
+
+void Logger::setLogLevel(LogLevel logLevel) {
     LOG_LEVEL = logLevel;
 }
 
-void OtamLogger::silly(String message) {
-    if (LOG_LEVEL >= OtamLogLevel::LOG_LEVEL_SILLY) {
+void Logger::silly(String message) {
+    if (LOG_LEVEL >= LogLevel::SILLY) {
         Serial.println("OTAM [SILLY]: " + message);
     }
 }
 
-void OtamLogger::debug(String message) {
-    if (LOG_LEVEL >= OtamLogLevel::LOG_LEVEL_DEBUG) {
+void Logger::debug(String message) {
+    if (LOG_LEVEL >= LogLevel::DEBUG) {
         Serial.println("OTAM [DEBUG]: " + message);
     }
 }
 
-void OtamLogger::verbose(String message) {
-    if (LOG_LEVEL >= OtamLogLevel::LOG_LEVEL_VERBOSE) {
+void Logger::verbose(String message) {
+    if (LOG_LEVEL >= LogLevel::VERBOSE) {
         Serial.println("OTAM [VERBOSE]: " + message);
     }
 }
 
-void OtamLogger::http(String message) {
-    if (LOG_LEVEL >= OtamLogLevel::LOG_LEVEL_VERBOSE) {
+void Logger::http(String message) {
+    if (LOG_LEVEL >= LogLevel::VERBOSE) {
         Serial.println("OTAM [HTTP]: " + message);
     }
 }
 
-void OtamLogger::info(String message) {
-    if (LOG_LEVEL >= OtamLogLevel::LOG_LEVEL_INFO) {
+void Logger::info(String message) {
+    if (LOG_LEVEL >= LogLevel::INFO) {
         Serial.println("OTAM [INFO]: " + message);
     }
 }
 
-void OtamLogger::warn(String message) {
-    if (LOG_LEVEL >= OtamLogLevel::LOG_LEVEL_WARN) {
+void Logger::warn(String message) {
+    if (LOG_LEVEL >= LogLevel::WARN) {
         Serial.println("OTAM [WARN]: " + message);
     }
 }
 
-void OtamLogger::error(String message) {
-    if (LOG_LEVEL >= OtamLogLevel::LOG_LEVEL_ERROR) {
+void Logger::error(String message) {
+    if (LOG_LEVEL >= LogLevel::ERROR) {
         Serial.println("OTAM [ERROR]: " + message);
     }
 }
+
+}  // namespace Otam

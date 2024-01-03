@@ -1,7 +1,7 @@
 #include "internal/OtamUpdater.h"
 
 void OtamUpdater::handleError(String error) {
-    OtamLogger::error(error);
+    Otam::Logger::error(error);
     if (otaErrorCallback)  // Check if the callback has been set
     {
         otaErrorCallback(error);  // Call the callback
@@ -28,16 +28,16 @@ void OtamUpdater::runESP32Update(HTTPClient& http) {
             size_t written = Update.writeStream(*client);
 
             if (written == contentLength) {
-                OtamLogger::info("Written : " + String(written) + " successfully");
+                Otam::Logger::info("Written : " + String(written) + " successfully");
             } else {
-                OtamLogger::info("Written only : " + String(written) + "/" + String(contentLength) +
+                Otam::Logger::info("Written only : " + String(written) + "/" + String(contentLength) +
                                  ". Retry?");
             }
 
             if (Update.end()) {
-                OtamLogger::info("OTA done!");
+                Otam::Logger::info("OTA done!");
                 if (Update.isFinished()) {
-                    OtamLogger::info("Update successfully completed. Rebooting.");
+                    Otam::Logger::info("Update successfully completed. Rebooting.");
                     if (otaSuccessCallback)  // Check if the callback has been set
                     {
                         otaSuccessCallback();  // Call the callback

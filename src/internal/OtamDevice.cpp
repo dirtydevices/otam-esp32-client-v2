@@ -2,18 +2,18 @@
 
 void OtamDevice::writeIdToStore(String id) {
     OtamStore::writeDeviceIdToStore(id);
-    OtamLogger::verbose("Device id written to store: " + id);
+    Otam::Logger::verbose("Device id written to store: " + id);
 }
 
 void OtamDevice::initialize(OtamConfig config) {
     // writeIdToStore("");
-    OtamLogger::info("Initializing device with OTAM server");
+    Otam::Logger::info("Initializing device with OTAM server");
 
     // Read the device id from the store
     String deviceIdStore = OtamStore::readDeviceIdFromStore();
 
     if (deviceIdStore != "") {
-        OtamLogger::verbose("Device id read from store: " + deviceIdStore);
+        Otam::Logger::verbose("Device id read from store: " + deviceIdStore);
     }
 
     String initUrl = config.url + "/init-device";
@@ -30,20 +30,20 @@ void OtamDevice::initialize(OtamConfig config) {
     } else if (response.httpCode == 201) {
         // Created
         deviceId = response.payload;
-        OtamLogger::info("New device created on OTAM server: " + deviceId);
+        Otam::Logger::info("New device created on OTAM server: " + deviceId);
     } else {
         // Error
-        OtamLogger::error("Setting device id failed with status code " + String(response.httpCode));
+        Otam::Logger::error("Setting device id failed with status code " + String(response.httpCode));
         throw std::runtime_error("Set device id failed");
     }
 
     if (deviceId != deviceIdStore) {
         writeIdToStore(deviceId);
     } else {
-        OtamLogger::verbose("Device id already in store, no need to write: " + deviceId);
+        Otam::Logger::verbose("Device id already in store, no need to write: " + deviceId);
     }
 
-    OtamLogger::info("Device has been initialized with OTAM server");
+    Otam::Logger::info("Device has been initialized with OTAM server");
 }
 
 OtamDevice::OtamDevice(OtamConfig config) {

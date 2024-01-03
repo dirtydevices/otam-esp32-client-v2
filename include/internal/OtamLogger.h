@@ -3,22 +3,15 @@
 
 #include <Arduino.h>
 
-enum class OtamLogLevel {
-    LOG_LEVEL_NONE,
-    LOG_LEVEL_ERROR,
-    LOG_LEVEL_WARN,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_HTTP,
-    LOG_LEVEL_VERBOSE,
-    LOG_LEVEL_DEBUG,
-    LOG_LEVEL_SILLY
-};
+namespace Otam {
 
-class OtamLogger {
+enum class LogLevel { NONE, ERROR, WARN, INFO, HTTP, VERBOSE, DEBUG, SILLY };
+
+class Logger {
    public:
-    static OtamLogLevel LOG_LEVEL;
+    static LogLevel LOG_LEVEL;
 
-    static void setLogLevel(OtamLogLevel logLevel);
+    static void setLogLevel(LogLevel logLevel);
     static void silly(String message);
     static void debug(String message);
     static void verbose(String message);
@@ -27,5 +20,7 @@ class OtamLogger {
     static void warn(String message);
     static void error(String message);
 };
+
+}  // namespace Otam
 
 #endif  // OTAM_LOGGER_H
