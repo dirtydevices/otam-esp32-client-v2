@@ -30,7 +30,6 @@ void OtamDevice::initialize(OtamConfig config) {
     } else if (response.httpCode == 201) {
         // Created
         deviceId = response.payload;
-        // Serial.println("New device created on OTAM server: " + deviceId);
     } else {
         // Error
         // Serial.println("Setting device id failed with status code " + String(response.httpCode));
@@ -38,9 +37,8 @@ void OtamDevice::initialize(OtamConfig config) {
     }
 
     if (deviceId != deviceIdStore) {
+        // Serial.println("Device id has changed, writing to store");
         writeIdToStore(deviceId);
-    } else {
-        // Serial.println("Device id already in store, no need to write: " + deviceId);
     }
 
     // Serial.println("Device has been initialized with OTAM server");
@@ -64,7 +62,4 @@ OtamDevice::OtamDevice(OtamConfig config) {
 
     // Set the device download URL
     deviceFirmwareFileUrl = this->deviceUrl + "/firmware-file-url";
-
-    // Create the db logger
-    logDb = new OtamLogDb(deviceLogUrl);
 }

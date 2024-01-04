@@ -30,16 +30,6 @@ void OtamClient::onOtaError(ErrorCallbackType errorCallback) {
     otaErrorCallback = errorCallback;
 }
 
-// Read firmware values from store
-FirmwareUpdateValues OtamClient::readFirmwareValuesFromStore() {
-    FirmwareUpdateValues firmwareValuesInStore;
-    firmwareValuesInStore.firmwareFileId = OtamStore::readFirmwareUpdateFileIdFromStore();
-    firmwareValuesInStore.firmwareId = OtamStore::readFirmwareUpdateIdFromStore();
-    firmwareValuesInStore.firmwareName = OtamStore::readFirmwareUpdateNameFromStore();
-    firmwareValuesInStore.firmwareVersion = OtamStore::readFirmwareUpdateVersionFromStore();
-    return firmwareValuesInStore;
-}
-
 void OtamClient::sendOtaUpdateError(String logMessage) {
     OtamHttp::post(otamDevice->deviceStatusUrl,
                    "{\"deviceStatus\":\"UPDATE_FAILED\",\"firmwareFileId\":" +
@@ -58,7 +48,6 @@ void OtamClient::sendOtaUpdateError(String logMessage) {
 OtamClient::OtamClient(const OtamConfig& config) {
     clientOtamConfig = config;
     OtamHttp::apiKey = config.apiKey;
-    FirmwareUpdateValues firmwareValuesInStore = readFirmwareValuesFromStore();
 }
 
 // Check if the device has been initialized
@@ -70,32 +59,31 @@ bool OtamClient::isInitialized() {
 void OtamClient::initialize() {
     if (!deviceInitialized) {
         // Serial.println("Initializing OTAM client");
-        try {
-            // Create the device
-            otamDevice = new OtamDevice(clientOtamConfig);
-            deviceInitialized = true;
+        // Create the device
+        otamDevice = new OtamDevice(clientOtamConfig);
+        deviceInitialized = true;
 
-            // If firmware update status success, publish to success callback
-            String firmwareUpdateStatus = OtamStore::readFirmwareUpdateStatusFromStore();
-            // Serial.println("OtamClient Contrcutor: Store -> Firmware update status: " + firmwareUpdateStatus);
-            if (firmwareUpdateStatus == "UPDATE_SUCCESS") {
-                // Serial.println(
-                //     "Firmware update status is UPDATE_SUCCESS, calling OTA success "
-                //     "callback");
-                FirmwareUpdateValues firmwareUpdateSuccessValues = readFirmwareValuesFromStore();
+        // If firmware update status success, publish to success callback
+        String firmwareUpdateStatus = OtamStore::readFirmwareUpdateStatusFromStore();
+        // Serial.println("OtamClient Contrcutor: Store -> Firmware update status: " + firmwareUpdateStatus);
+        if (firmwareUpdateStatus == "UPDATE_SUCCESS") {
+            // Serial.println(
+            //     "Firmware update status is UPDATE_SUCCESS, calling OTA success "
+            //     "callback");
+            FirmwareUpdateValues firmwareUpdateSuccessValues;
+            firmwareUpdateSuccessValues.firmwareFileId = OtamStore::readFirmwareUpdateFileIdFromStore();
+            firmwareUpdateSuccessValues.firmwareId = OtamStore::readFirmwareUpdateIdFromStore();
+            firmwareUpdateSuccessValues.firmwareName = OtamStore::readFirmwareUpdateNameFromStore();
+            firmwareUpdateSuccessValues.firmwareVersion = OtamStore::readFirmwareUpdateVersionFromStore();
 
-                // Clear the firmware update status
-                OtamStore::writeFirmwareUpdateStatusToStore("NONE");
+            // Clear the firmware update status
+            OtamStore::writeFirmwareUpdateStatusToStore("NONE");
 
-                // Check if the callback has been set
-                if (otaSuccessCallback) {
-                    // Call the callback with parameters
-                    otaSuccessCallback(firmwareUpdateSuccessValues);
-                }
+            // Check if the callback has been set
+            if (otaSuccessCallback) {
+                // Call the callback with parameters
+                otaSuccessCallback(firmwareUpdateSuccessValues);
             }
-        } catch (const std::runtime_error& e) {
-            // Serial.println("An OTAM error occurred: " + String(e.what()));
-            throw std::runtime_error("Could not initalize OTAM Device");
         }
     }
 }
@@ -105,19 +93,14 @@ OtamHttpResponse OtamClient::logDeviceMessage(String message) {
     // Send the log entry
     OtamHttpResponse response = OtamHttp::post(otamDevice->deviceLogUrl, "{\"message\":\"" + message + "\"}");
 
+    // Return the response
     return response;
 }
 
 // Check if a firmware update is available
 boolean OtamClient::hasPendingUpdate() {
     if (!deviceInitialized) {
-        try {
-            // Serial.println("hasPendingUpdate() called but OTAM client not initialized");
-            initialize();
-        } catch (const std::runtime_error& e) {
-            // Serial.println("An OTAM error occurred: " + String(e.what()));
-            throw std::runtime_error("Could not initalize OTAM Client with server");
-        }
+        initialize();
     }
 
     if (!updateStarted) {
@@ -132,7 +115,6 @@ boolean OtamClient::hasPendingUpdate() {
 
         // Check if the device status is UPDATE_PENDING
         if (deviceStatus == "UPDATE_PENDING") {
-            // Serial.println("Firmware update available");
             firmwareUpdateValues.firmwareFileId = OtamUtils::getJSONValue(parsed, "firmwareFileId").toInt();
             firmwareUpdateValues.firmwareId = OtamUtils::getJSONValue(parsed, "firmwareId").toInt();
             firmwareUpdateValues.firmwareName = OtamUtils::getJSONValue(parsed, "firmwareName");
@@ -143,24 +125,18 @@ boolean OtamClient::hasPendingUpdate() {
             // Serial.println("Firmware update version: " + firmwareUpdateValues.firmwareVersion);
             delete parsed;
             return true;
-        } else {
-            // Serial.println("No firmware update available");
-            delete parsed;
-            return false;
         }
+
+        // Serial.println("No firmware update available");
+        delete parsed;
+        return false;
     }
 }
 
 // Perform the firmware update
 void OtamClient::doFirmwareUpdate() {
     if (!otamDevice) {
-        try {
-            // Serial.println("doFirmwareUpdate() called, OTAM client not initialized");
-            initialize();
-        } catch (const std::runtime_error& e) {
-            // Serial.println("An OTAM error occurred: " + String(e.what()));
-            throw std::runtime_error("Could not initalize OTAM Client with server");
-        }
+        initialize();
     }
 
     updateStarted = true;

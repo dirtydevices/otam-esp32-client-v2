@@ -3,7 +3,6 @@
 
 #include "internal/OtamConfig.h"
 #include "internal/OtamHttp.h"
-#include "internal/OtamLogDb.h"
 #include "internal/OtamStore.h"
 #include "internal/OtamUpdater.h"
 #include "internal/OtamUtils.h"
@@ -21,7 +20,6 @@ class OtamDevice {
     String deviceStatusUrl;
     String deviceInitializeUrl;
     String deviceFirmwareFileUrl;
-    OtamLogDb* logDb;
     explicit OtamDevice(OtamConfig config);
 };
 

@@ -16,11 +16,10 @@ struct FirmwareUpdateValues {
 class OtamClient {
    private:
     OtamConfig clientOtamConfig;
-    bool deviceInitialized = false;
     OtamDevice* otamDevice;
+    bool deviceInitialized = false;
     bool updateStarted = false;
     FirmwareUpdateValues firmwareUpdateValues;
-    FirmwareUpdateValues readFirmwareValuesFromStore();
     void sendOtaUpdateError(String logMessage);
 
    public:
