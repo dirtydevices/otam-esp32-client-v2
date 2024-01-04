@@ -7,20 +7,23 @@
 #include "internal/OtamLogger.h"
 
 class OtamUpdater {
-   private:
-    void handleError(String error);
-
    public:
     // Define the type for the callback functions
     using CallbackType = std::function<void()>;
-    using ErrorCallbackType = std::function<void(String)>;
+    using NumberCallbackType = std::function<void(int)>;
+    using StringCallbackType = std::function<void(String)>;
 
     // Variables to hold the callback functions
+    CallbackType otaAfterDownloadCallback;
+    NumberCallbackType otaDownloadProgressCallback;
     CallbackType otaSuccessCallback;
-    ErrorCallbackType otaErrorCallback;
+    StringCallbackType otaErrorCallback;
 
+    // Define the callback functions
+    void onOtaAfterDownload(CallbackType afterDownloadCallback);
+    void onOtaDownloadProgress(NumberCallbackType progressCallback);
     void onOtaSuccess(CallbackType successCallback);
-    void onOtaError(ErrorCallbackType errorCallback);
+    void onOtaError(StringCallbackType errorCallback);
     void runESP32Update(HTTPClient& http);
 };
 

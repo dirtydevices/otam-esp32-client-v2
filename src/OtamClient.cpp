@@ -1,7 +1,7 @@
 #include "OtamClient.h"
 
 // Subscribe to the OTA download progress callback
-void OtamClient::onOtaDownloadProgress(StringCalbackType progressCallback) {
+void OtamClient::onOtaDownloadProgress(NumberCallbackType progressCallback) {
     otaDownloadProgressCallback = progressCallback;
 }
 
@@ -75,18 +75,18 @@ FirmwareUpdateValues OtamClient::readFirmwareValuesFromStore() {
 }
 
 void OtamClient::sendOtaUpdateError(String logMessage) {
-    String payload = "{\"deviceStatus\":\"UPDATE_FAILED\",\"firmwareFileId\":" +
-                     String(firmwareUpdateValues.firmwareFileId) +
-                     ",\"firmwareId\":" + String(firmwareUpdateValues.firmwareId) +
-                     ",\"firmwareVersion\":\"" + firmwareUpdateValues.firmwareVersion +
-                     "\",\"logMessage\":\"" + logMessage + "\"}";
+    OtamHttp::post(otamDevice->deviceStatusUrl,
+                   "{\"deviceStatus\":\"UPDATE_FAILED\",\"firmwareFileId\":" +
+                       String(firmwareUpdateValues.firmwareFileId) + ",\"firmwareId\":" +
+                       String(firmwareUpdateValues.firmwareId) + ",\"firmwareVersion\":\"" +
+                       firmwareUpdateValues.firmwareVersion + "\",\"logMessage\":\"" + logMessage + "\"}");
 
-    OtamHttpResponse response = OtamHttp::post(otamDevice->deviceStatusUrl, payload);
-    if (response.httpCode >= 200 && response.httpCode < 300) {
-        Otam::Logger::debug("OTA update error sent to server");
-    } else {
-        Otam::Logger::error("OTA update error failed to send to server");
-    }
+    // OtamHttpResponse response = OtamHttp::post(otamDevice->deviceStatusUrl, payload);
+    // if (response.httpCode >= 200 && response.httpCode < 300) {
+    //     Otam::Logger::debug("OTA update error sent to server");
+    // } else {
+    //     Otam::Logger::error("OTA update error failed to send to server");
+    // }
 }
 
 OtamClient::OtamClient(const OtamConfig& config) {
@@ -110,52 +110,49 @@ OtamClient::OtamClient(const OtamConfig& config) {
     // }
 }
 
+// Check if the device has been initialized
+bool OtamClient::isInitialized() {
+    return deviceInitialized;
+}
+
 // Initialize the OTAM client
 void OtamClient::initialize() {
-    Otam::Logger::verbose("Initializing OTAM client");
+    if (!deviceInitialized) {
+        // Otam::Logger::verbose("Initializing OTAM client");
+        try {
+            // Create the device
+            otamDevice = new OtamDevice(clientOtamConfig);
+            deviceInitialized = true;
 
-    try {
-        // Create the device
-        otamDevice = new OtamDevice(clientOtamConfig);
-        deviceInitialized = true;
-    } catch (const std::runtime_error& e) {
-        Otam::Logger::error("An OTAM error occurred: " + String(e.what()));
-        throw std::runtime_error("Could not initalize OTAM Device");
-    }
+            // If firmware update status success, publish to success callback
+            String firmwareUpdateStatus = OtamStore::readFirmwareUpdateStatusFromStore();
+            // Otam::Logger::debug("OtamClient Contrcutor: Store -> Firmware update status: " + firmwareUpdateStatus);
+            if (firmwareUpdateStatus == "UPDATE_SUCCESS") {
+                // Otam::Logger::verbose(
+                //     "Firmware update status is UPDATE_SUCCESS, calling OTA success "
+                //     "callback");
+                FirmwareUpdateValues firmwareUpdateSuccessValues = readFirmwareValuesFromStore();
 
-    // If firmware update status success, publish to success callback
-    String firmwareUpdateStatus = OtamStore::readFirmwareUpdateStatusFromStore();
-    Otam::Logger::debug("OtamClient Contrcutor: Store -> Firmware update status: " + firmwareUpdateStatus);
-    if (firmwareUpdateStatus == "UPDATE_SUCCESS") {
-        Otam::Logger::verbose(
-            "Firmware update status is UPDATE_SUCCESS, calling OTA success "
-            "callback");
-        FirmwareUpdateValues firmwareUpdateSuccessValues = readFirmwareValuesFromStore();
+                // Clear the firmware update status
+                OtamStore::writeFirmwareUpdateStatusToStore("NONE");
 
-        // Clear the firmware update status
-        OtamStore::writeFirmwareUpdateStatusToStore("NONE");
-
-        // Check if the callback has been set
-        if (otaSuccessCallback) {
-            // Call the callback with parameters
-            otaSuccessCallback(firmwareUpdateSuccessValues);
+                // Check if the callback has been set
+                if (otaSuccessCallback) {
+                    // Call the callback with parameters
+                    otaSuccessCallback(firmwareUpdateSuccessValues);
+                }
+            }
+        } catch (const std::runtime_error& e) {
+            Otam::Logger::error("An OTAM error occurred: " + String(e.what()));
+            throw std::runtime_error("Could not initalize OTAM Device");
         }
     }
 }
 
 // Log a message to the device log api
 OtamHttpResponse OtamClient::logDeviceMessage(String message) {
-    // Create the payload
-    String payload = "{\"message\":\"" + message + "\"}";
-
     // Send the log entry
-    OtamHttpResponse response = OtamHttp::post(otamDevice->deviceLogUrl, payload);
-
-    if (response.httpCode >= 200 && response.httpCode < 300) {
-        Otam::Logger::verbose("Device message logged successfully: " + message);
-    } else {
-        throw std::runtime_error("Device message logging failed");
-    }
+    OtamHttpResponse response = OtamHttp::post(otamDevice->deviceLogUrl, "{\"message\":\"" + message + "\"}");
 
     return response;
 }
@@ -164,45 +161,42 @@ OtamHttpResponse OtamClient::logDeviceMessage(String message) {
 boolean OtamClient::hasPendingUpdate() {
     if (!deviceInitialized) {
         try {
-            Otam::Logger::verbose("hasPendingUpdate() called but OTAM client not initialized");
+            // Otam::Logger::verbose("hasPendingUpdate() called but OTAM client not initialized");
             initialize();
         } catch (const std::runtime_error& e) {
-            Otam::Logger::error("An OTAM error occurred: " + String(e.what()));
+            // Otam::Logger::error("An OTAM error occurred: " + String(e.what()));
             throw std::runtime_error("Could not initalize OTAM Client with server");
         }
     }
 
-    if (updateStarted) {
-        Otam::Logger::verbose("hasPendingUpdate() called, Firmware update already started");
-        return false;
-    }
+    if (!updateStarted) {
+        // Get the device status from the server
+        OtamHttpResponse response = OtamHttp::get(otamDevice->deviceStatusUrl);
 
-    // Get the device status from the server
-    OtamHttpResponse response = OtamHttp::get(otamDevice->deviceStatusUrl);
+        // Parse the response
+        cJSON* parsed = OtamUtils::parseJSON(response.payload);
 
-    // Parse the response
-    cJSON* parsed = OtamUtils::parseJSON(response.payload);
+        // Get the device status from the response
+        String deviceStatus = OtamUtils::getJSONValue(parsed, "deviceStatus");
 
-    // Get the device status from the response
-    String deviceStatus = OtamUtils::getJSONValue(parsed, "deviceStatus");
-
-    // Check if the device status is UPDATE_PENDING
-    if (deviceStatus == "UPDATE_PENDING") {
-        Otam::Logger::debug("Firmware update available");
-        firmwareUpdateValues.firmwareFileId = OtamUtils::getJSONValue(parsed, "firmwareFileId").toInt();
-        firmwareUpdateValues.firmwareId = OtamUtils::getJSONValue(parsed, "firmwareId").toInt();
-        firmwareUpdateValues.firmwareName = OtamUtils::getJSONValue(parsed, "firmwareName");
-        firmwareUpdateValues.firmwareVersion = OtamUtils::getJSONValue(parsed, "firmwareVersion");
-        Otam::Logger::debug("Firmware update file ID: " + String(firmwareUpdateValues.firmwareFileId));
-        Otam::Logger::debug("Firmware update ID: " + String(firmwareUpdateValues.firmwareId));
-        Otam::Logger::debug("Firmware update name: " + firmwareUpdateValues.firmwareName);
-        Otam::Logger::debug("Firmware update version: " + firmwareUpdateValues.firmwareVersion);
-        delete parsed;
-        return true;
-    } else {
-        Otam::Logger::debug("No firmware update available");
-        delete parsed;
-        return false;
+        // Check if the device status is UPDATE_PENDING
+        if (deviceStatus == "UPDATE_PENDING") {
+            Otam::Logger::debug("Firmware update available");
+            firmwareUpdateValues.firmwareFileId = OtamUtils::getJSONValue(parsed, "firmwareFileId").toInt();
+            firmwareUpdateValues.firmwareId = OtamUtils::getJSONValue(parsed, "firmwareId").toInt();
+            firmwareUpdateValues.firmwareName = OtamUtils::getJSONValue(parsed, "firmwareName");
+            firmwareUpdateValues.firmwareVersion = OtamUtils::getJSONValue(parsed, "firmwareVersion");
+            Otam::Logger::debug("Firmware update file ID: " + String(firmwareUpdateValues.firmwareFileId));
+            Otam::Logger::debug("Firmware update ID: " + String(firmwareUpdateValues.firmwareId));
+            Otam::Logger::debug("Firmware update name: " + firmwareUpdateValues.firmwareName);
+            Otam::Logger::debug("Firmware update version: " + firmwareUpdateValues.firmwareVersion);
+            delete parsed;
+            return true;
+        } else {
+            // Otam::Logger::debug("No firmware update available");
+            delete parsed;
+            return false;
+        }
     }
 }
 
@@ -210,21 +204,21 @@ boolean OtamClient::hasPendingUpdate() {
 void OtamClient::doFirmwareUpdate() {
     if (!otamDevice) {
         try {
-            Otam::Logger::verbose("doFirmwareUpdate() called, OTAM client not initialized");
+            // Otam::Logger::verbose("doFirmwareUpdate() called, OTAM client not initialized");
             initialize();
         } catch (const std::runtime_error& e) {
-            Otam::Logger::error("An OTAM error occurred: " + String(e.what()));
+            // Otam::Logger::error("An OTAM error occurred: " + String(e.what()));
             throw std::runtime_error("Could not initalize OTAM Client with server");
         }
     }
 
     updateStarted = true;
 
-    Otam::Logger::info("Firmware update started");
+    // Otam::Logger::info("Firmware update started");
 
     HTTPClient http;
 
-    Otam::Logger::verbose("Getting device firmware file url from: " + otamDevice->deviceFirmwareFileUrl);
+    // Otam::Logger::verbose("Getting device firmware file url from: " + otamDevice->deviceFirmwareFileUrl);
 
     // Get the device status from the server
     OtamHttpResponse response = OtamHttp::get(otamDevice->deviceFirmwareFileUrl);
@@ -239,16 +233,22 @@ void OtamClient::doFirmwareUpdate() {
         return;
     }
 
-    Otam::Logger::verbose("Downloading firmware file bin from: " + response.payload);
+    // Otam::Logger::verbose("Downloading firmware file bin from: " + response.payload);
 
     http.begin(response.payload);
     http.addHeader("x-api-key", clientOtamConfig.apiKey);
 
-    Otam::Logger::verbose("HTTP GET: " + response.payload);
+    // Otam::Logger::verbose("HTTP GET: " + response.payload);
 
+    // Publish to the before download callback
+    if (otaBeforeDownloadCallback) {
+        otaBeforeDownloadCallback();
+    }
+
+    // Start the download
     int httpCode = http.GET();
 
-    Otam::Logger::verbose("HTTP GET response code: " + String(httpCode));
+    // Otam::Logger::verbose("HTTP GET response code: " + String(httpCode));
 
     if (httpCode == HTTP_CODE_OK) {
         // Status 200 : Download available
@@ -257,47 +257,65 @@ void OtamClient::doFirmwareUpdate() {
 
         OtamUpdater* otamUpdater = new OtamUpdater();
 
+        // Subscribe to the OTA download progress callback
+        otamUpdater->onOtaDownloadProgress([this](int progress) {
+            if (otaDownloadProgressCallback) {
+                otaDownloadProgressCallback(progress);
+            }
+        });
+
+        // Subscribe to the OTA after download callback
+        otamUpdater->onOtaAfterDownload([this]() {
+            if (otaAfterDownloadCallback) {
+                otaAfterDownloadCallback();
+            }
+        });
+
         otamUpdater->onOtaSuccess([this]() {
-            Otam::Logger::info("OTA success callback called");
+            // Otam::Logger::info("OTA success callback called");
 
-            Otam::Logger::verbose("Notifying OTAM server of successful update");
-
-            // Create the payload with status and file ID
-            String payload = "{\"deviceStatus\":\"UPDATE_SUCCESS\",\"firmwareFileId\":" +
-                             String(firmwareUpdateValues.firmwareFileId) +
-                             ",\"firmwareId\":" + String(firmwareUpdateValues.firmwareId) +
-                             ",\"firmwareVersion\":\"" + firmwareUpdateValues.firmwareVersion + "\"}";
+            // Otam::Logger::verbose("Notifying OTAM server of successful update");
 
             // Update device on the server
-            OtamHttpResponse response = OtamHttp::post(otamDevice->deviceStatusUrl, payload);
+            OtamHttpResponse response =
+                OtamHttp::post(otamDevice->deviceStatusUrl,
+                               "{\"deviceStatus\":\"UPDATE_SUCCESS\",\"firmwareFileId\":" +
+                                   String(firmwareUpdateValues.firmwareFileId) +
+                                   ",\"firmwareId\":" + String(firmwareUpdateValues.firmwareId) +
+                                   ",\"firmwareVersion\":\"" + firmwareUpdateValues.firmwareVersion + "\"}");
 
             // Store the updated firmware file id
             OtamStore::writeFirmwareUpdateFileIdToStore(firmwareUpdateValues.firmwareFileId);
-            Otam::Logger::verbose("Firmware update file ID stored: " +
-                                  String(firmwareUpdateValues.firmwareFileId));
+            // Otam::Logger::verbose("Firmware update file ID stored: " +
+            //                       String(firmwareUpdateValues.firmwareFileId));
 
             // Store the updated firmware id
             OtamStore::writeFirmwareUpdateIdToStore(firmwareUpdateValues.firmwareId);
-            Otam::Logger::verbose("Firmware update ID stored: " + String(firmwareUpdateValues.firmwareId));
+            // Otam::Logger::verbose("Firmware update ID stored: " + String(firmwareUpdateValues.firmwareId));
 
             // Store the updated firmware name
             OtamStore::writeFirmwareUpdateNameToStore(firmwareUpdateValues.firmwareName);
-            Otam::Logger::verbose("Firmware update name stored: " + firmwareUpdateValues.firmwareName);
+            // Otam::Logger::verbose("Firmware update name stored: " + firmwareUpdateValues.firmwareName);
 
             // Store the updated firmware version
             OtamStore::writeFirmwareUpdateVersionToStore(firmwareUpdateValues.firmwareVersion);
-            Otam::Logger::verbose("Firmware update version stored: " + firmwareUpdateValues.firmwareVersion);
+            // Otam::Logger::verbose("Firmware update version stored: " + firmwareUpdateValues.firmwareVersion);
 
             // Store firmware update status
             OtamStore::writeFirmwareUpdateStatusToStore("UPDATE_SUCCESS");
-            Otam::Logger::verbose("Firmware update status stored: UPDATE_SUCCESS");
+            // Otam::Logger::verbose("Firmware update status stored: UPDATE_SUCCESS");
+
+            // Publish to the on before reboot callback
+            if (otaBeforeRebootCallback) {
+                otaBeforeRebootCallback();
+            }
 
             // Restart the device
             ESP.restart();
         });
 
         otamUpdater->onOtaError([this](String error) {
-            Otam::Logger::debug("OTA error callback called");
+            // Otam::Logger::debug("OTA error callback called");
             updateStarted = false;
             if (otaErrorCallback) {
                 otaErrorCallback(firmwareUpdateValues, error);

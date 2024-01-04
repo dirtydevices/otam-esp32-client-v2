@@ -1,18 +1,18 @@
 #include "internal/OtamUpdater.h"
 
-void OtamUpdater::handleError(String error) {
-    Otam::Logger::error(error);
-    if (otaErrorCallback)  // Check if the callback has been set
-    {
-        otaErrorCallback(error);  // Call the callback
-    }
+void OtamUpdater::onOtaAfterDownload(CallbackType afterDownloadCallback) {
+    otaAfterDownloadCallback = afterDownloadCallback;
+}
+
+void OtamUpdater::onOtaDownloadProgress(NumberCallbackType progressCallback) {
+    otaDownloadProgressCallback = progressCallback;
 }
 
 void OtamUpdater::onOtaSuccess(CallbackType successCallback) {
     otaSuccessCallback = successCallback;
 }
 
-void OtamUpdater::onOtaError(ErrorCallbackType errorCallback) {
+void OtamUpdater::onOtaError(StringCallbackType errorCallback) {
     otaErrorCallback = errorCallback;
 }
 
@@ -24,6 +24,10 @@ void OtamUpdater::runESP32Update(HTTPClient& http) {
         if (canBegin) {
             WiFiClient* client = http.getStreamPtr();
 
+            Update.onProgress([this](size_t progress, size_t total) {
+                otaDownloadProgressCallback(progress / (total / 100));
+            });
+
             // Write the downloaded binary to flash memory
             size_t written = Update.writeStream(*client);
 
@@ -31,32 +35,30 @@ void OtamUpdater::runESP32Update(HTTPClient& http) {
                 Otam::Logger::info("Written : " + String(written) + " successfully");
             } else {
                 Otam::Logger::info("Written only : " + String(written) + "/" + String(contentLength) +
-                                 ". Retry?");
+                                   ". Retry?");
             }
 
             if (Update.end()) {
-                Otam::Logger::info("OTA done!");
+                // Download complete
+                otaAfterDownloadCallback();
                 if (Update.isFinished()) {
                     Otam::Logger::info("Update successfully completed. Rebooting.");
-                    if (otaSuccessCallback)  // Check if the callback has been set
-                    {
-                        otaSuccessCallback();  // Call the callback
-                    }
+                    otaSuccessCallback();
                 } else {
-                    handleError("Update did not finish, something went wrong!");
+                    otaErrorCallback("Update did not finish, something went wrong!");
                 }
             } else {
-                handleError("Error Occurred. Error #: " + String(Update.getError()));
+                otaErrorCallback("Error Occurred. Error #: " + String(Update.getError()));
             }
         } else {
-            handleError("Not enough space to begin OTA");
+            otaErrorCallback("Not enough space to begin OTA");
         }
 
     } catch (const std::runtime_error& e) {
-        handleError(e.what());
+        otaErrorCallback(e.what());
     } catch (const std::exception& e) {
-        handleError(e.what());
+        otaErrorCallback(e.what());
     } catch (...) {
-        handleError("Unknown error occurred");
+        otaErrorCallback("Unknown error occurred");
     }
 }

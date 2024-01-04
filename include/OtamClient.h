@@ -27,22 +27,23 @@ class OtamClient {
    public:
     explicit OtamClient(const OtamConfig& config);
     using EmptyCallbackType = std::function<void()>;
-    using StringCalbackType = std::function<void(String)>;
+    using NumberCallbackType = std::function<void(int)>;
     using SuccessCallbackType = std::function<void(FirmwareUpdateValues)>;
     using ErrorCallbackType = std::function<void(FirmwareUpdateValues, String)>;
-    StringCalbackType otaDownloadProgressCallback;
+    NumberCallbackType otaDownloadProgressCallback;
     EmptyCallbackType otaBeforeDownloadCallback;
     EmptyCallbackType otaAfterDownloadCallback;
     EmptyCallbackType otaBeforeRebootCallback;
     SuccessCallbackType otaSuccessCallback;
     ErrorCallbackType otaErrorCallback;
-    void onOtaDownloadProgress(StringCalbackType progressCallback);
+    void onOtaDownloadProgress(NumberCallbackType progressCallback);
     void onOtaBeforeDownload(EmptyCallbackType beforeDownloadCallback);
     void onOtaAfterDownload(EmptyCallbackType afterDownloadCallback);
     void onOtaBeforeReboot(EmptyCallbackType beforeRebootCallback);
     void onOtaSuccess(SuccessCallbackType successCallback);
     void onOtaError(ErrorCallbackType errorCallback);
     void setLogLevel(String logLevel);
+    bool isInitialized();
     void initialize();
     OtamHttpResponse logDeviceMessage(String message);
     boolean hasPendingUpdate();
