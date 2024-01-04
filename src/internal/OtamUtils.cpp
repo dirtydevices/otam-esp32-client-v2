@@ -5,9 +5,9 @@ cJSON* OtamUtils::parseJSON(String json) {
 
     if (parsed == NULL) {
         const char* error_ptr = cJSON_GetErrorPtr();
-        if (error_ptr != NULL) {
-            Serial.println("Error before: " + String(error_ptr));
-        }
+        // if (error_ptr != NULL) {
+        //     Serial.println("Error before: " + String(error_ptr));
+        // }
         return NULL;
     }
 

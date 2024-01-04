@@ -5,7 +5,6 @@
 #include "internal/OtamConfig.h"
 #include "internal/OtamDevice.h"
 #include "internal/OtamHttp.h"
-#include "internal/OtamLogger.h"
 
 struct FirmwareUpdateValues {
     int firmwareFileId;
@@ -42,7 +41,6 @@ class OtamClient {
     void onOtaBeforeReboot(EmptyCallbackType beforeRebootCallback);
     void onOtaSuccess(SuccessCallbackType successCallback);
     void onOtaError(ErrorCallbackType errorCallback);
-    void setLogLevel(String logLevel);
     bool isInitialized();
     void initialize();
     OtamHttpResponse logDeviceMessage(String message);

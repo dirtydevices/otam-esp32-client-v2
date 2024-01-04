@@ -4,7 +4,6 @@
 #include <HTTPClient.h>
 #include <Update.h>
 #include <functional>
-#include "internal/OtamLogger.h"
 
 class OtamUpdater {
    public:

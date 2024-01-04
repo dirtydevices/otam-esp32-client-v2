@@ -31,18 +31,18 @@ void OtamUpdater::runESP32Update(HTTPClient& http) {
             // Write the downloaded binary to flash memory
             size_t written = Update.writeStream(*client);
 
-            if (written == contentLength) {
-                Otam::Logger::info("Written : " + String(written) + " successfully");
-            } else {
-                Otam::Logger::info("Written only : " + String(written) + "/" + String(contentLength) +
-                                   ". Retry?");
-            }
+            // if (written == contentLength) {
+            //     Serial.println("Written : " + String(written) + " successfully");
+            // } else {
+            //     Serial.println("Written only : " + String(written) + "/" + String(contentLength) +
+            //                    ". Retry?");
+            // }
 
             if (Update.end()) {
                 // Download complete
                 otaAfterDownloadCallback();
                 if (Update.isFinished()) {
-                    Otam::Logger::info("Update successfully completed. Rebooting.");
+                    // Serial.println("Update successfully completed. Rebooting.");
                     otaSuccessCallback();
                 } else {
                     otaErrorCallback("Update did not finish, something went wrong!");

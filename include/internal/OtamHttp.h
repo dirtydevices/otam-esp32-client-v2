@@ -2,7 +2,6 @@
 #define OTAM_HTTP_H
 
 #include <HttpClient.h>
-#include "internal/OtamLogger.h"
 
 struct OtamHttpResponse {
     int httpCode;

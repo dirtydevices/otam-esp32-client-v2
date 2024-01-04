@@ -4,7 +4,6 @@
 #include "internal/OtamConfig.h"
 #include "internal/OtamHttp.h"
 #include "internal/OtamLogDb.h"
-#include "internal/OtamLogger.h"
 #include "internal/OtamStore.h"
 #include "internal/OtamUpdater.h"
 #include "internal/OtamUtils.h"
