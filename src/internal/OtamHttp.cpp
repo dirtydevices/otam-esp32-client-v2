@@ -11,12 +11,11 @@ OtamHttpResponse OtamHttp::get(String url) {
 
     try {
         int httpCode = http.GET();
+        String response = http.getString();
 
-        if (httpCode == HTTP_CODE_OK) {
-            String response = http.getString();
-            http.end();
-            return {httpCode, response};
-        }
+        http.end();
+
+        return {httpCode, response};
     } catch (const std::exception& e) {
         http.end();
         // Serial.println("Exception in HTTP GET: " + String(e.what()));
@@ -30,11 +29,9 @@ OtamHttpResponse OtamHttp::post(String url, String payload) {
     try {
         http.begin(url);
         http.addHeader("x-api-key", apiKey);
-
         http.addHeader("Content-Type", "application/json");
 
         int httpCode = http.POST(payload);
-
         String response = http.getString();
 
         http.end();

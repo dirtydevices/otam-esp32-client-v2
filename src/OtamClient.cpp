@@ -129,8 +129,9 @@ boolean OtamClient::hasPendingUpdate() {
 
         // Serial.println("No firmware update available");
         delete parsed;
-        return false;
     }
+
+    return false;
 }
 
 // Perform the firmware update
