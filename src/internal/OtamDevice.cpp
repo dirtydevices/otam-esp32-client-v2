@@ -38,10 +38,9 @@ void OtamDevice::initialize(OtamConfig config) {
         deviceId = response.payload;
     } else {
         Serial.println("Setting device id failed with status code " + String(response.httpCode));
-        throw std::runtime_error("Set device id failed");
     }
 
-    if (deviceId != deviceIdStore) {
+    if (deviceId != deviceIdStore && deviceId != "") {
         Serial.println("Device id has changed, writing to store");
         writeIdToStore(deviceId);
     }
