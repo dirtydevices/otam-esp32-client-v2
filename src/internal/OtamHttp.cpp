@@ -18,8 +18,7 @@ OtamHttpResponse OtamHttp::get(String url) {
         return {httpCode, response};
     } catch (const std::exception& e) {
         http.end();
-        // Serial.println("Exception in HTTP GET: " + String(e.what()));
-        throw std::runtime_error("Exception in HTTP GET Request");
+        return {httpCode: 0, payload: String(e.what())};
     }
 }
 
@@ -39,7 +38,6 @@ OtamHttpResponse OtamHttp::post(String url, String payload) {
         return {httpCode, payload: response};
     } catch (const std::exception& e) {
         http.end();
-        // Serial.println("Exception in HTTP POST: " + String(e.what()));
-        throw std::runtime_error("Exception in HTTP POST Request");
+        return {httpCode: 0, payload: String(e.what())};
     }
 }

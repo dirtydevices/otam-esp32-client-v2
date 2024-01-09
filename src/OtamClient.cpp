@@ -109,28 +109,30 @@ boolean OtamClient::hasPendingUpdate() {
         // Get the device status from the server
         OtamHttpResponse response = OtamHttp::get(otamDevice->deviceStatusUrl);
 
-        // Parse the response
-        cJSON* parsed = OtamUtils::parseJSON(response.payload);
+        if (response.httpCode == 200) {
+            // Parse the response
+            cJSON* parsed = OtamUtils::parseJSON(response.payload);
 
-        // Get the device status from the response
-        String deviceStatus = OtamUtils::getJSONValue(parsed, "deviceStatus");
+            // Get the device status from the response
+            String deviceStatus = OtamUtils::getJSONValue(parsed, "deviceStatus");
 
-        // Check if the device status is UPDATE_PENDING
-        if (deviceStatus == "UPDATE_PENDING") {
-            firmwareUpdateValues.firmwareFileId = OtamUtils::getJSONValue(parsed, "firmwareFileId").toInt();
-            firmwareUpdateValues.firmwareId = OtamUtils::getJSONValue(parsed, "firmwareId").toInt();
-            firmwareUpdateValues.firmwareName = OtamUtils::getJSONValue(parsed, "firmwareName");
-            firmwareUpdateValues.firmwareVersion = OtamUtils::getJSONValue(parsed, "firmwareVersion");
-            // Serial.println("Firmware update file ID: " + String(firmwareUpdateValues.firmwareFileId));
-            // Serial.println("Firmware update ID: " + String(firmwareUpdateValues.firmwareId));
-            // Serial.println("Firmware update name: " + firmwareUpdateValues.firmwareName);
-            // Serial.println("Firmware update version: " + firmwareUpdateValues.firmwareVersion);
+            // Check if the device status is UPDATE_PENDING
+            if (deviceStatus == "UPDATE_PENDING") {
+                firmwareUpdateValues.firmwareFileId =
+                    OtamUtils::getJSONValue(parsed, "firmwareFileId").toInt();
+                firmwareUpdateValues.firmwareId = OtamUtils::getJSONValue(parsed, "firmwareId").toInt();
+                firmwareUpdateValues.firmwareName = OtamUtils::getJSONValue(parsed, "firmwareName");
+                firmwareUpdateValues.firmwareVersion = OtamUtils::getJSONValue(parsed, "firmwareVersion");
+                // Serial.println("Firmware update file ID: " + String(firmwareUpdateValues.firmwareFileId));
+                // Serial.println("Firmware update ID: " + String(firmwareUpdateValues.firmwareId));
+                // Serial.println("Firmware update name: " + firmwareUpdateValues.firmwareName);
+                // Serial.println("Firmware update version: " + firmwareUpdateValues.firmwareVersion);
+                delete parsed;
+                return true;
+            }
+            // Serial.println("No firmware update available");
             delete parsed;
-            return true;
         }
-
-        // Serial.println("No firmware update available");
-        delete parsed;
     }
 
     return false;
