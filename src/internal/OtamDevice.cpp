@@ -2,7 +2,7 @@
 
 void OtamDevice::writeIdToStore(String id) {
     OtamStore::writeDeviceIdToStore(id);
-    Serial.println("Device id written to store: " + id);
+    // Serial.println("Device id written to store: " + id);
 }
 
 void OtamDevice::initialize(OtamConfig config) {

@@ -57,9 +57,11 @@ bool OtamClient::isInitialized() {
 
 // Initialize the OTAM client
 void OtamClient::initialize() {
+    Serial.println("otamClient->initialize() called");
     if (!deviceInitialized) {
         // Serial.println("Initializing OTAM client");
         // Create the device
+        Serial.println("calling new OtamDevice(clientOtamConfig)");
         otamDevice = new OtamDevice(clientOtamConfig);
         deviceInitialized = true;
 
