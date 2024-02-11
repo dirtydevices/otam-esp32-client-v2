@@ -37,8 +37,8 @@ void OtamDevice::initialize(OtamConfig config) {
         // Created
         deviceId = response.payload;
     } else {
-        Serial.println("Error: Setting device id failed with status code " + String(response.httpCode));
-        Serial.println("Error payload: " + response.payload);
+        // Serial.println("Error: Setting device id failed with status code " + String(response.httpCode));
+        Serial.println("Error: " + response.payload);
         return;
     }
 
