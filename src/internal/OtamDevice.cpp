@@ -18,7 +18,8 @@ void OtamDevice::initialize(OtamConfig config) {
 
     String initUrl = config.url + "/init-device";
     String payload = "{\"deviceIdStore\":\"" + deviceIdStore + "\", \"deviceIdConfig\":\"" + config.deviceId +
-                     "\", \"generateDeviceId\":" + String(config.regenerateDeviceId) + "}";
+                     "\", \"generateDeviceId\":" + String(config.regenerateDeviceId) +
+                     ", \"deviceName\": \"" + config.deviceName + "\"}";
 
     Serial.println("Calling http post with payload: " + payload);
 
