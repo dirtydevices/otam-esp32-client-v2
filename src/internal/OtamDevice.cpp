@@ -17,9 +17,9 @@ void OtamDevice::initialize(OtamConfig config) {
     }
 
     String initUrl = config.url + "/init-device";
-    String payload = "{\"deviceIdStore\":\"" + deviceIdStore + "\", \"deviceIdConfig\":\"" + config.deviceId +
-                     "\", \"generateDeviceId\":" + String(config.regenerateDeviceId) +
-                     ", \"deviceName\": \"" + config.deviceName + "\"}";
+    // Create payload with deviceName and deviceId
+    String payload =
+        "{\"deviceName\": \"" + config.deviceName + "\", \"deviceIdStore\": \"" + deviceIdStore + "\"}";
 
     Serial.println("Calling http post with payload: " + payload);
 
@@ -29,25 +29,18 @@ void OtamDevice::initialize(OtamConfig config) {
     Serial.println("Received response from server");
 
     if (response.httpCode == 200) {
-        Serial.println("Status code 200");
         // Device found in OTAM DB
+        Serial.println("Device Id returned from OTAM server: " + response.payload);
+        // Set the device id
         deviceId = response.payload;
-    } else if (response.httpCode == 201) {
-        Serial.println("Status code 201");
-        // Created
-        deviceId = response.payload;
+        // Write the device id to the store
+        writeIdToStore(response.payload);
+        // Log success
+        Serial.println("Device has been initialized with OTAM server");
     } else {
-        // Serial.println("Error: Setting device id failed with status code " + String(response.httpCode));
-        Serial.println("Error: " + response.payload);
-        return;
+        // Log error
+        Serial.println("Error: " + String(response.httpCode) + " - " + String(response.payload));
     }
-
-    if (deviceId != deviceIdStore && deviceId != "") {
-        Serial.println("Device id has changed, writing to store");
-        writeIdToStore(deviceId);
-    }
-
-    Serial.println("Device has been initialized with OTAM server");
 }
 
 OtamDevice::OtamDevice(OtamConfig config) {
