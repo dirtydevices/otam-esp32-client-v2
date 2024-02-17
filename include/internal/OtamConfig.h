@@ -9,10 +9,10 @@ struct OtamFirmwareConfig {
 };
 
 struct OtamConfig {
-    String apiKey = "";      // user's api key
-    String url = "";         // base otam api url
-    String deviceId = "";    // auto-generated if not provided
-    String deviceName = "";  // device name
+    String apiKey = "";    // user's api key
+    String url = "";       // base otam api url
+    String deviceId = "";  // auto-generated if not provided
+    String deviceName;     // device name
     String logLevel = "LOG_LEVEL_INFO";
     bool regenerateDeviceId = false;  // if true, device id will be regenerated on every boot
     OtamFirmwareConfig firmwareConfig;

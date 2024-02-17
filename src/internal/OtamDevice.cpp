@@ -38,9 +38,9 @@ void OtamDevice::initialize(OtamConfig config) {
         // Log success
         Serial.println("Device has been initialized with OTAM server");
     } else {
-        // Log error
-        Serial.println("Error: " + String(response.httpCode) + " - " + String(response.payload));
-    }
+        Serial.println("Error Status code: " + response.httpCode);
+        Serial.println("Error Payload: " + response.payload);
+        }
 }
 
 OtamDevice::OtamDevice(OtamConfig config) {
