@@ -10,16 +10,18 @@ void OtamDevice::initialize(OtamConfig config) {
     Serial.println("Initializing device with OTAM server");
 
     // Read the device id from the store
-    String deviceIdStore = OtamStore::readDeviceIdFromStore();
+    String deviceGuidStore = OtamStore::readDeviceIdFromStore();
 
-    if (deviceIdStore != "") {
-        Serial.println("Device id read from store: " + deviceIdStore);
+    if (deviceGuidStore != "") {
+        Serial.println("Device GUID read from store: " + deviceGuidStore);
     }
 
+    // Set the init url
     String initUrl = config.url + "/init-device";
-    // Create payload with deviceName and deviceId
+
+    // Set the payload
     String payload =
-        "{\"deviceName\": \"" + config.deviceName + "\", \"deviceIdStore\": \"" + deviceIdStore + "\"}";
+        "{\"deviceId\": \"" + config.deviceId + "\", \"deviceGuid\": \"" + deviceGuidStore + "\"}";
 
     Serial.println("Calling http post with payload: " + payload);
 
@@ -30,17 +32,17 @@ void OtamDevice::initialize(OtamConfig config) {
 
     if (response.httpCode == 200) {
         // Device found in OTAM DB
-        Serial.println("Device Id returned from OTAM server: " + response.payload);
-        // Set the device id
-        deviceId = response.payload;
-        // Write the device id to the store
+        Serial.println("Device GUID returned from OTAM server: " + response.payload);
+        // Set the device guid
+        deviceGuid = response.payload;
+        // Write the device guid to the store
         writeIdToStore(response.payload);
         // Log success
         Serial.println("Device has been initialized with OTAM server");
     } else {
         Serial.println("Error Status code: " + response.httpCode);
         Serial.println("Error Payload: " + response.payload);
-        }
+    }
 }
 
 OtamDevice::OtamDevice(OtamConfig config) {
@@ -48,7 +50,7 @@ OtamDevice::OtamDevice(OtamConfig config) {
     initialize(config);
 
     // Set the device URL
-    deviceUrl = config.url + "/devices/" + deviceId;
+    deviceUrl = config.url + "/devices/" + deviceGuid;
 
     // Set the device log URL
     deviceLogUrl = this->deviceUrl + "/log";

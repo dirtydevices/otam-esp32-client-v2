@@ -3,19 +3,10 @@
 
 #include <Arduino.h>
 
-struct OtamFirmwareConfig {
-    String firmwareId = "";
-    String firmwareVersion = "";
-};
-
 struct OtamConfig {
-    String apiKey = "";    // user's api key
-    String url = "";       // base otam api url
-    String deviceId = "";  // auto-generated if not provided
-    String deviceName;     // device name
-    String logLevel = "LOG_LEVEL_INFO";
-    bool regenerateDeviceId = false;  // if true, device id will be regenerated on every boot
-    OtamFirmwareConfig firmwareConfig;
+    String apiKey = "";  // user's api key
+    String url = "";     // base otam api url
+    String deviceId;     // device id
 };
 
 #endif  // OTAM_CONFIG_H

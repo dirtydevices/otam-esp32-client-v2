@@ -6,31 +6,31 @@ String OtamStore::readDeviceIdFromStore() {
         throw std::runtime_error("Failed to initialize NVS");
     }
 
-    String deviceId;
+    String deviceGuid;
 
-    if (preferences.isKey("device_id")) {
-        deviceId = preferences.getString("device_id");  // Try to read the device ID from NVS
+    if (preferences.isKey("device_guid")) {
+        deviceGuid = preferences.getString("device_guid");  // Try to read the device ID from NVS
     }
 
     preferences.end();
-    return deviceId;
+    return deviceGuid;
 }
 
-void OtamStore::writeDeviceIdToStore(String deviceId) {
+void OtamStore::writeDeviceIdToStore(String deviceGuid) {
     Preferences preferences;
     if (!preferences.begin("otam-store", false)) {
         throw std::runtime_error("Failed to initialize NVS");
     }
 
-    if (deviceId.length() == 0) {
-        if (preferences.getString("device_id", "").length() > 0) {
-            if (!preferences.remove("device_id")) {
+    if (deviceGuid.length() == 0) {
+        if (preferences.getString("device_guid", "").length() > 0) {
+            if (!preferences.remove("device_guid")) {
                 throw std::runtime_error("Failed to remove device ID from NVS");
                 preferences.end();
                 return;
             }
         }
-    } else if (!preferences.putString("device_id", deviceId)) {
+    } else if (!preferences.putString("device_guid", deviceGuid)) {
         throw std::runtime_error("Failed to write device ID to NVS");
         preferences.end();
         return;

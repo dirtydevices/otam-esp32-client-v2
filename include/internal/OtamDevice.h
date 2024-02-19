@@ -13,8 +13,7 @@ class OtamDevice {
     void initialize(OtamConfig config);
 
    public:
-    String deviceId;
-    String deviceName;
+    String deviceGuid;
     String deviceUrl;
     String deviceLogUrl;
     String deviceStatusUrl;

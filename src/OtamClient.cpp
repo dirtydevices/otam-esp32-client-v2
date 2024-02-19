@@ -36,13 +36,6 @@ void OtamClient::sendOtaUpdateError(String logMessage) {
                        String(firmwareUpdateValues.firmwareFileId) + ",\"firmwareId\":" +
                        String(firmwareUpdateValues.firmwareId) + ",\"firmwareVersion\":\"" +
                        firmwareUpdateValues.firmwareVersion + "\",\"logMessage\":\"" + logMessage + "\"}");
-
-    // OtamHttpResponse response = OtamHttp::post(otamDevice->deviceStatusUrl, payload);
-    // if (response.httpCode >= 200 && response.httpCode < 300) {
-    //     Serial.println("OTA update error sent to server");
-    // } else {
-    //     Serial.println("OTA update error failed to send to server");
-    // }
 }
 
 OtamClient::OtamClient(const OtamConfig& config) {
