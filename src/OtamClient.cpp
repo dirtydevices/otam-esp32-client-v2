@@ -31,6 +31,7 @@ void OtamClient::onOtaError(ErrorCallbackType errorCallback) {
 }
 
 void OtamClient::sendOtaUpdateError(String logMessage) {
+    Serial.println("Sending OTA update error: " + logMessage);
     OtamHttp::post(otamDevice->deviceStatusUrl,
                    "{\"deviceStatus\":\"UPDATE_FAILED\",\"firmwareFileId\":" +
                        String(firmwareUpdateValues.firmwareFileId) + ",\"firmwareId\":" +
