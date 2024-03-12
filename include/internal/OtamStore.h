@@ -5,8 +5,8 @@
 
 class OtamStore {
    public:
-    static String readDeviceIdFromStore();
-    static void writeDeviceIdToStore(String deviceGuid);
+    static String readDeviceGuidFromStore();
+    static void writeDeviceGuidToStore(String deviceGuid);
     static int readFirmwareUpdateFileIdFromStore();
     static void writeFirmwareUpdateFileIdToStore(int firmwareUpdateFileId);
     static int readFirmwareUpdateIdFromStore();

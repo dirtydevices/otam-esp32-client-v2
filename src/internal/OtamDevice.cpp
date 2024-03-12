@@ -1,7 +1,7 @@
 #include "internal/OtamDevice.h"
 
 void OtamDevice::writeIdToStore(String id) {
-    OtamStore::writeDeviceIdToStore(id);
+    OtamStore::writeDeviceGuidToStore(id);
     // Serial.println("Device id written to store: " + id);
 }
 
@@ -10,7 +10,7 @@ void OtamDevice::initialize(OtamConfig config) {
     Serial.println("Initializing device with OTAM server");
 
     // Read the device id from the store
-    String deviceGuidStore = OtamStore::readDeviceIdFromStore();
+    String deviceGuidStore = OtamStore::readDeviceGuidFromStore();
 
     if (deviceGuidStore != "") {
         Serial.println("Device GUID read from store: " + deviceGuidStore);
@@ -20,8 +20,9 @@ void OtamDevice::initialize(OtamConfig config) {
     String initUrl = config.url + "/init-device";
 
     // Set the payload
-    String payload =
-        "{\"deviceId\": \"" + config.deviceId + "\", \"deviceGuid\": \"" + deviceGuidStore + "\"}";
+    // With deviceId, deviceGuid, deviceProfileId
+    String payload = "{\"deviceId\":\"" + config.deviceId + "\",\"deviceGuid\":\"" + deviceGuidStore +
+                     "\",\"deviceProfileId\":" + config.deviceProfileId + "}";
 
     Serial.println("Calling http post with payload: " + payload);
 

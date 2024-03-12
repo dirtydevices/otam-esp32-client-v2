@@ -1,6 +1,6 @@
 #include "internal/OtamStore.h"
 
-String OtamStore::readDeviceIdFromStore() {
+String OtamStore::readDeviceGuidFromStore() {
     Preferences preferences;
     if (!preferences.begin("otam-store", false)) {
         throw std::runtime_error("Failed to initialize NVS");
@@ -16,7 +16,7 @@ String OtamStore::readDeviceIdFromStore() {
     return deviceGuid;
 }
 
-void OtamStore::writeDeviceIdToStore(String deviceGuid) {
+void OtamStore::writeDeviceGuidToStore(String deviceGuid) {
     Preferences preferences;
     if (!preferences.begin("otam-store", false)) {
         throw std::runtime_error("Failed to initialize NVS");
