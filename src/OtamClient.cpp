@@ -160,10 +160,16 @@ void OtamClient::doFirmwareUpdate() {
 
     // Serial.println("Downloading firmware file bin from: " + response.payload);
 
-    http.begin(response.payload);
-    http.addHeader("x-api-key", clientOtamConfig.apiKey);
+    // Check if payload begins with http
+    String url = "";
+    if (response.payload.startsWith("http")) {
+        url = response.payload;
+    } else {
+        url = clientOtamConfig.url + response.payload;
+    }
 
-    // Serial.println("HTTP GET: " + response.payload);
+    http.begin(url);
+    http.addHeader("x-api-key", clientOtamConfig.apiKey);
 
     // Publish to the before download callback
     if (otaBeforeDownloadCallback) {
