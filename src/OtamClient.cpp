@@ -203,9 +203,16 @@ void OtamClient::doFirmwareUpdate() {
         });
 
         otamUpdater->onOtaSuccess([this]() {
-            // Serial.println("OTA success callback called");
+            Serial.println("OTAM: OTA success callback called");
 
             // Serial.println("Notifying OTAM server of successful update");
+
+            Serial.println("OTAM: Updating device status on server with the following values:");
+            Serial.println("POST Url: " + otamDevice->deviceStatusUrl);
+            Serial.println("Firmware file ID: " + String(firmwareUpdateValues.firmwareFileId));
+            Serial.println("Firmware ID: " + String(firmwareUpdateValues.firmwareId));
+            Serial.println("Firmware name: " + firmwareUpdateValues.firmwareName);
+            Serial.println("Firmware version: " + firmwareUpdateValues.firmwareVersion);
 
             // Update device on the server
             OtamHttpResponse response =
@@ -214,6 +221,8 @@ void OtamClient::doFirmwareUpdate() {
                                    String(firmwareUpdateValues.firmwareFileId) +
                                    ",\"firmwareId\":" + String(firmwareUpdateValues.firmwareId) +
                                    ",\"firmwareVersion\":\"" + firmwareUpdateValues.firmwareVersion + "\"}");
+
+                        Serial.println("OTAM: Post Response - " + response.payload);
 
             // Store the updated firmware file id
             OtamStore::writeFirmwareUpdateFileIdToStore(firmwareUpdateValues.firmwareFileId);
@@ -240,6 +249,8 @@ void OtamClient::doFirmwareUpdate() {
             if (otaBeforeRebootCallback) {
                 otaBeforeRebootCallback();
             }
+
+            Serial.println("OTAM: Rebooting device");
 
             // Restart the device
             ESP.restart();
