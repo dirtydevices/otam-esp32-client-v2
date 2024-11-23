@@ -222,7 +222,7 @@ void OtamClient::doFirmwareUpdate() {
                                    ",\"firmwareId\":" + String(firmwareUpdateValues.firmwareId) +
                                    ",\"firmwareVersion\":\"" + firmwareUpdateValues.firmwareVersion + "\"}");
 
-                        Serial.println("OTAM: Post Response - " + response.payload);
+            Serial.println("OTAM: Post Response - " + response.payload);
 
             // Store the updated firmware file id
             OtamStore::writeFirmwareUpdateFileIdToStore(firmwareUpdateValues.firmwareFileId);
@@ -253,7 +253,8 @@ void OtamClient::doFirmwareUpdate() {
             Serial.println("OTAM: Rebooting device");
 
             // Restart the device
-            ESP.restart();
+            // ESP.restart();
+            esp_deep_sleep_start();
         });
 
         otamUpdater->onOtaError([this](String error) {
