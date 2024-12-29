@@ -9,20 +9,24 @@ void OtamDevice::initialize(OtamConfig config) {
     // writeIdToStore("");
     Serial.println("Initializing device with OTAM server");
 
-    // Read the device id from the store
-    String deviceGuidStore = OtamStore::readDeviceGuidFromStore();
-
-    if (deviceGuidStore != "") {
-        Serial.println("Device GUID read from store: " + deviceGuidStore);
-    }
-
     // Set the init url
     String initUrl = config.url + "/init-device";
 
     // Set the payload
-    // With deviceId, deviceGuid, deviceProfileId
-    String payload = "{\"deviceId\":\"" + config.deviceId + "\",\"deviceGuid\":\"" + deviceGuidStore +
-                     "\",\"deviceProfileId\":" + config.deviceProfileId + "}";
+    // With deviceId, deviceProfileId, firmwareId, firmwareVersion
+    // Do not pass firmwareId if not part of config
+    String payload =
+        "{\"deviceId\":\"" + config.deviceId + "\",\"firmwareVersion\":\"" + config.firmwareVersion + "\"";
+
+    if (config.firmwareId != 0) {
+        payload += ",\"firmwareId\":" + String(config.firmwareId);
+    }
+
+    if (config.deviceProfileId != 0) {
+        payload += ",\"deviceProfileId\":" + String(config.deviceProfileId);
+    }
+
+    payload += "}";
 
     Serial.println("Calling http post with payload: " + payload);
 
@@ -50,15 +54,9 @@ OtamDevice::OtamDevice(OtamConfig config) {
     // Initialize device with OTAM server
     initialize(config);
 
-    // Set the device URL
-    deviceUrl = config.url + "/devices/" + deviceGuid;
-
     // Set the device log URL
-    deviceLogUrl = this->deviceUrl + "/log";
+    deviceLogUrl = config.url + "/devices/" + deviceGuid + "/log";
 
-    // Set the device status URL
-    deviceStatusUrl = this->deviceUrl + "/status";
-
-    // Set the device download URL
-    deviceFirmwareFileUrl = this->deviceUrl + "/firmware-file-url";
+    // Set the has update URL
+    hasUpdateUrl = config.url + "/ota/has-update/device/get-first";
 }
