@@ -14,7 +14,6 @@ void OtamDevice::initialize(OtamConfig config) {
 
     // Set the payload
     // With deviceId, deviceProfileId, firmwareId, firmwareVersion
-    // Do not pass firmwareId if not part of config
     String payload =
         "{\"deviceId\":\"" + config.deviceId + "\",\"firmwareVersion\":\"" + config.firmwareVersion + "\"";
 

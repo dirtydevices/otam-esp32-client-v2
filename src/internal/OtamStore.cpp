@@ -8,7 +8,7 @@ String OtamStore::readDeviceGuidFromStore() {
 
     String deviceGuid;
 
-    if (preferences.isKey("device_guid")) {
+    if (preferences.isKey("deviceGuid")) {
         deviceGuid = preferences.getString("device_guid");  // Try to read the device ID from NVS
     }
 
@@ -23,14 +23,14 @@ void OtamStore::writeDeviceGuidToStore(String deviceGuid) {
     }
 
     if (deviceGuid.length() == 0) {
-        if (preferences.getString("device_guid", "").length() > 0) {
-            if (!preferences.remove("device_guid")) {
+        if (preferences.getString("deviceGuid", "").length() > 0) {
+            if (!preferences.remove("deviceGuid")) {
                 throw std::runtime_error("Failed to remove device ID from NVS");
                 preferences.end();
                 return;
             }
         }
-    } else if (!preferences.putString("device_guid", deviceGuid)) {
+    } else if (!preferences.putString("deviceGuid", deviceGuid)) {
         throw std::runtime_error("Failed to write device ID to NVS");
         preferences.end();
         return;
