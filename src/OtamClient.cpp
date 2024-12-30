@@ -97,6 +97,14 @@ const char* OtamClient::hasFirmwareUpdate() {
     if (response.httpCode == 200 && response.payload.length() < sizeof(hasUpdateCache)) {
         strncpy(hasUpdateCache, response.payload.c_str(), sizeof(hasUpdateCache) - 1);
         hasUpdateCache[sizeof(hasUpdateCache) - 1] = '\0';  // Ensure null-termination
+
+        // If the response is not empty, prepend the clientOtamConfig.url
+        if (strlen(hasUpdateCache) > 0) {
+            String updatedResponse = clientOtamConfig.url + String(hasUpdateCache);
+            strncpy(hasUpdateCache, updatedResponse.c_str(), sizeof(hasUpdateCache) - 1);
+            hasUpdateCache[sizeof(hasUpdateCache) - 1] = '\0';
+        }
+
         return hasUpdateCache;
     } else {
         hasUpdateCache[0] = '\0';  // Indicate no update or error
@@ -105,7 +113,7 @@ const char* OtamClient::hasFirmwareUpdate() {
 }
 
 // Perform the firmware update
-void OtamClient::doFirmwareUpdate() {
+void OtamClient::doFirmwareUpdate(const char* downloadUrl) {
     if (!otamDevice) {
         initialize();
     }
@@ -118,30 +126,9 @@ void OtamClient::doFirmwareUpdate() {
 
     // Serial.println("Getting device firmware file url from: " + otamDevice->deviceFirmwareFileUrl);
 
-    // Get the device status from the server
-    OtamHttpResponse response = OtamHttp::get(otamDevice->deviceFirmwareFileUrl);
+    // Removed the call that fetched the firmware file URL
 
-    if (response.httpCode != 200 || response.payload == "") {
-        String error = "Firmware file url request failed, error: " + String(response.httpCode);
-        updateStarted = false;
-        if (otaErrorCallback) {
-            otaErrorCallback(error);
-        }
-        sendOtaUpdateError(error);
-        return;
-    }
-
-    // Serial.println("Downloading firmware file bin from: " + response.payload);
-
-    // Check if payload begins with http
-    String url = "";
-    if (response.payload.startsWith("http")) {
-        url = response.payload;
-    } else {
-        url = clientOtamConfig.url + response.payload;
-    }
-
-    http.begin(url);
+    http.begin(String(downloadUrl));
     http.addHeader("x-api-key", clientOtamConfig.apiKey);
 
     // Publish to the before download callback
@@ -196,11 +183,11 @@ void OtamClient::doFirmwareUpdate() {
             //                        ",\"firmwareVersion\":\"" + firmwareUpdateValues.firmwareVersion + "\"}");
 
             // Store the updated firmware id
-            OtamStore::writeFirmwareUpdateIdToStore(firmwareUpdateValues.firmwareId);
+            // OtamStore::writeFirmwareUpdateIdToStore(firmwareUpdateValues.firmwareId);
             // Serial.println("Firmware update ID stored: " + String(firmwareUpdateValues.firmwareId));
 
             // Store the updated firmware version
-            OtamStore::writeFirmwareUpdateVersionToStore(firmwareUpdateValues.firmwareVersion);
+            // OtamStore::writeFirmwareUpdateVersionToStore(firmwareUpdateValues.firmwareVersion);
             // Serial.println("Firmware update version stored: " + firmwareUpdateValues.firmwareVersion);
 
             // Store firmware update status
@@ -215,8 +202,8 @@ void OtamClient::doFirmwareUpdate() {
             Serial.println("OTAM: Rebooting device");
 
             // Restart the device
-            // ESP.restart();
-            esp_deep_sleep_start();
+            ESP.restart();
+            // esp_deep_sleep_start();
         });
 
         otamUpdater->onOtaError([this](String error) {
