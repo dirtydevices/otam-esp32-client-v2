@@ -202,8 +202,8 @@ void OtamClient::doFirmwareUpdate(const char* downloadUrl) {
             Serial.println("OTAM: Rebooting device");
 
             // Restart the device
-            ESP.restart();
-            // esp_deep_sleep_start();
+            // ESP.restart();
+            esp_deep_sleep_start();
         });
 
         otamUpdater->onOtaError([this](String error) {
