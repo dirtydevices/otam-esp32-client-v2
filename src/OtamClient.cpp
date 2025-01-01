@@ -30,13 +30,12 @@ void OtamClient::onOtaError(ErrorCallbackType errorCallback) {
     otaErrorCallback = errorCallback;
 }
 
-void OtamClient::sendOtaUpdateError(String logMessage) {
-    Serial.println("Sending OTA update error: " + logMessage);
-    // OtamHttp::post(otamDevice->deviceStatusUrl,
-    //                "{\"deviceStatus\":\"UPDATE_FAILED\",\"firmwareFileId\":" +
-    //                    String(firmwareUpdateValues.firmwareFileId) + ",\"firmwareId\":" +
-    //                    String(firmwareUpdateValues.firmwareId) + ",\"firmwareVersion\":\"" +
-    //                    firmwareUpdateValues.firmwareVersion + "\",\"logMessage\":\"" + logMessage + "\"}");
+void OtamClient::sendOtaUpdateError(String message) {
+    Serial.println("Sending OTA update error: " + message);
+    String logMessage = "Update failed - Firmware ID: " + String(firmwareUpdateValues.firmwareId) +
+                        " - Version: " + firmwareUpdateValues.firmwareVersion + " - Error: " + message;
+    OtamHttp::post(otamDevice->deviceStatusUrl,
+                   "{\"deviceStatus\":\"UPDATE_FAILED\", \"logMessage\":\"" + logMessage + "\"}");
 }
 
 OtamClient::OtamClient(const OtamConfig& config) {
@@ -61,11 +60,7 @@ void OtamClient::initialize() {
         // If firmware update status success, publish success callback
         String firmwareUpdateStatus = OtamStore::readFirmwareUpdateStatusFromStore();
         // Serial.println("OtamClient Contrcutor: Store -> Firmware update status: " + firmwareUpdateStatus);
-        if (firmwareUpdateStatus == "UPDATE_SUCCESS") {
-            // Serial.println(
-            //     "Firmware update status is UPDATE_SUCCESS, calling OTA success "
-            //     "callback");
-
+        if (firmwareUpdateStatus == "DEVICE_FLASHHED") {
             // Clear the firmware update status
             OtamStore::writeFirmwareUpdateStatusToStore("NONE");
 
@@ -120,13 +115,12 @@ void OtamClient::doFirmwareUpdate(const char* downloadUrl) {
 
     updateStarted = true;
 
-    // Serial.println("Firmware update started");
+    String logMessage = "Starting firmware update.";
+
+    OtamHttp::post(otamDevice->deviceStatusUrl,
+                   "{\"deviceStatus\":\"UPDATE_STARTED\",\"logMessage\":\"" + logMessage + "\"}");
 
     HTTPClient http;
-
-    // Serial.println("Getting device firmware file url from: " + otamDevice->deviceFirmwareFileUrl);
-
-    // Removed the call that fetched the firmware file URL
 
     http.begin(String(downloadUrl));
     http.addHeader("x-api-key", clientOtamConfig.apiKey);
@@ -142,10 +136,6 @@ void OtamClient::doFirmwareUpdate(const char* downloadUrl) {
     // Serial.println("HTTP GET response code: " + String(httpCode));
 
     if (httpCode == HTTP_CODE_OK) {
-        // Status 200 : Download available
-
-        // Serial.println("New firmware available");
-
         OtamUpdater* otamUpdater = new OtamUpdater();
 
         // Subscribe to the OTA download progress callback
@@ -165,34 +155,13 @@ void OtamClient::doFirmwareUpdate(const char* downloadUrl) {
         otamUpdater->onOtaSuccess([this]() {
             Serial.println("OTAM: OTA success callback called");
 
-            // Serial.println("Notifying OTAM server of successful update");
+            String logMessage = "Device has been flashed.";
 
-            // Serial.println("OTAM: Updating device status on server with the following values:");
-            // Serial.println("POST Url: " + otamDevice->deviceStatusUrl);
-            // Serial.println("Firmware file ID: " + String(firmwareUpdateValues.firmwareFileId));
-            // Serial.println("Firmware ID: " + String(firmwareUpdateValues.firmwareId));
-            // Serial.println("Firmware name: " + firmwareUpdateValues.firmwareName);
-            // Serial.println("Firmware version: " + firmwareUpdateValues.firmwareVersion);
-
-            // Update device on the server
-            // OtamHttpResponse response =
-            //     OtamHttp::post(otamDevice->deviceStatusUrl,
-            //                    "{\"deviceStatus\":\"UPDATE_SUCCESS\",\"firmwareFileId\":" +
-            //                        String(firmwareUpdateValues.firmwareFileId) +
-            //                        ",\"firmwareId\":" + String(firmwareUpdateValues.firmwareId) +
-            //                        ",\"firmwareVersion\":\"" + firmwareUpdateValues.firmwareVersion + "\"}");
-
-            // Store the updated firmware id
-            // OtamStore::writeFirmwareUpdateIdToStore(firmwareUpdateValues.firmwareId);
-            // Serial.println("Firmware update ID stored: " + String(firmwareUpdateValues.firmwareId));
-
-            // Store the updated firmware version
-            // OtamStore::writeFirmwareUpdateVersionToStore(firmwareUpdateValues.firmwareVersion);
-            // Serial.println("Firmware update version stored: " + firmwareUpdateValues.firmwareVersion);
+            OtamHttp::post(otamDevice->deviceStatusUrl,
+                           "{\"deviceStatus\":\"DEVICE_FLASHED\",\"logMessage\":\"" + logMessage + "\"}");
 
             // Store firmware update status
-            OtamStore::writeFirmwareUpdateStatusToStore("UPDATE_SUCCESS");
-            // Serial.println("Firmware update status stored: UPDATE_SUCCESS");
+            OtamStore::writeFirmwareUpdateStatusToStore("DEVICE_FLASHED");
 
             // Publish to the on before reboot callback
             if (otaBeforeRebootCallback) {

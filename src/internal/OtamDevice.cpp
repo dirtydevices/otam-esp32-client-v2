@@ -56,6 +56,9 @@ OtamDevice::OtamDevice(OtamConfig config) {
     // Set the device log URL
     deviceLogUrl = config.url + "/devices/" + deviceGuid + "/log";
 
-    // Set the has update URL
+    // Set the hasUpdate URL
     hasUpdateUrl = config.url + "/ota/has-update/device/get-first";
+
+    // Set the status URL
+    deviceStatusUrl = config.url + "/ota/status/device/" + deviceGuid;
 }

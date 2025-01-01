@@ -16,6 +16,7 @@ class OtamDevice {
     String deviceGuid;
     String deviceLogUrl;
     String hasUpdateUrl;
+    String deviceStatusUrl;
     String deviceInitializeUrl;
     String deviceFirmwareFileUrl;
     explicit OtamDevice(OtamConfig config);
