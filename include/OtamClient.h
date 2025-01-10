@@ -44,7 +44,8 @@ class OtamClient {
     void initialize();
     OtamHttpResponse logDeviceMessage(String message);
     const char* hasFirmwareUpdate();
-    void doFirmwareUpdate(const char* downloadUrl);
+    void doFirmwareUpdateWithFileId(int firmwareFileId);
+    void doFirmwareUpdateWithUrl(const char* downloadUrl);
 };
 
 #endif  // OTAM_CLIENT_H

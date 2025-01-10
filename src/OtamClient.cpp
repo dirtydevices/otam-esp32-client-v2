@@ -107,11 +107,24 @@ const char* OtamClient::hasFirmwareUpdate() {
     }
 }
 
+void OtamClient::doFirmwareUpdateWithFileId(int firmwareFileId) {
+    // Build download url with firmwareFileId
+    // ota/download/firmwareFileId
+    String downloadUrlStr = clientOtamConfig.url + "/ota/download/" + String(firmwareFileId);
+    const char* downloadUrl = downloadUrlStr.c_str();
+
+    Serial.println("Downloading firmware from: " + downloadUrlStr);
+
+    doFirmwareUpdateWithUrl(downloadUrl);
+}
+
 // Perform the firmware update
-void OtamClient::doFirmwareUpdate(const char* downloadUrl) {
+void OtamClient::doFirmwareUpdateWithUrl(const char* downloadUrl) {
     if (!otamDevice) {
         initialize();
     }
+
+    Serial.println("Starting firmware update with URL: " + String(downloadUrl));
 
     updateStarted = true;
 
