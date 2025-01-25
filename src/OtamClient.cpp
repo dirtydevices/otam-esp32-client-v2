@@ -102,6 +102,7 @@ const char* OtamClient::hasFirmwareUpdate() {
 
         return hasUpdateCache;
     } else {
+        Serial.println("Error");
         hasUpdateCache[0] = '\0';  // Indicate no update or error
         return nullptr;
     }

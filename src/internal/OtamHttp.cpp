@@ -11,7 +11,11 @@ OtamHttpResponse OtamHttp::get(String url) {
 
     try {
         int httpCode = http.GET();
-        String response = http.getString();
+
+        String response = "";
+        if (httpCode != HTTP_CODE_NO_CONTENT) {
+            response = http.getString();
+        }
 
         http.end();
 
@@ -31,10 +35,13 @@ OtamHttpResponse OtamHttp::post(String url, String payload) {
         http.addHeader("Content-Type", "application/json");
 
         int httpCode = http.POST(payload);
-        String response = http.getString();
+
+        String response = "";
+        if (httpCode != HTTP_CODE_NO_CONTENT) {
+            response = http.getString();
+        }
 
         http.end();
-
         return {httpCode, payload: response};
     } catch (const std::exception& e) {
         http.end();
